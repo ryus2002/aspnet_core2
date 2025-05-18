@@ -1,0 +1,153 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - PRODUCT_SERVICE_URL=http://product-service:3002
+      - ORDER_SERVICE_URL=http://order-service:3003
+      - PAYMENT_SERVICE_URL=http://payment-service:3004
+      - JWT_SECRET=your-secret-key
+    depends_on:
+      - auth-service
+      - product-service
+      - order-service
+      - payment-service
+    networks:
+      - microservices-network
+
+  # 認證服務
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - DB_PATH=/app/data/auth.db
+      - JWT_SECRET=your-secret-key
+      - NODE_ENV=development
+    volumes:
+      - ./data/auth:/app/data
+    networks:
+      - microservices-network
+
+  # 商品服務
+  product-service:
+    build:
+      context: ./services/product-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - MONGO_URI=mongodb://mongo:27017/product_service
+      - RABBITMQ_URL=amqp://rabbitmq
+      - NODE_ENV=development
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - microservices-network
+
+  # 訂單服務
+  order-service:
+    build:
+      context: ./services/order-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - DB_HOST=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=order_service
+      - DB_PORT=5432
+      - RABBITMQ_URL=amqp://rabbitmq
+      - PAYMENT_SERVICE_URL=http://payment-service:3004
+      - PRODUCT_SERVICE_URL=http://product-service:3002
+      - NODE_ENV=development
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - microservices-network
+
+  # 支付服務
+  payment-service:
+    build:
+      context: ./services/payment-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - DB_HOST=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=payment_service
+      - DB_PORT=5432
+      - RABBITMQ_URL=amqp://rabbitmq
+      - NODE_ENV=development
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - microservices-network
+
+  # MongoDB (商品服務)
+  mongo:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - microservices-network
+
+  # PostgreSQL (訂單和支付服務)
+  postgres:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_MULTIPLE_DATABASES: order_service,payment_service
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - microservices-network
+
+  # RabbitMQ (消息隊列)
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"  # AMQP 端口
+      - "15672:15672"  # 管理界面端口
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+  postgres_data:
+  rabbitmq_data:
