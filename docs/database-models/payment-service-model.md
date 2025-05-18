@@ -65,7 +65,7 @@ CREATE TABLE payment_methods (
     display_order INT NOT NULL DEFAULT 0,      -- 顯示順序
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (code)
+    CONSTRAINT uk_payment_methods_code UNIQUE (code)
 );
 ```
 
@@ -200,12 +200,14 @@ CREATE TABLE payment_notifications (
     error_message TEXT NULL,                   -- 錯誤信息
     received_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 接收時間
     processed_at TIMESTAMP NULL,               -- 處理時間
-    INDEX idx_payment_notifications_transaction_id (payment_transaction_id),
-    INDEX idx_payment_notifications_provider_id (payment_provider_id),
-    INDEX idx_payment_notifications_processed (processed),
-    FOREIGN KEY (payment_transaction_id) REFERENCES payment_transactions(id),
-    FOREIGN KEY (payment_provider_id) REFERENCES payment_providers(id)
+    CONSTRAINT fk_payment_notifications_transaction_id FOREIGN KEY (payment_transaction_id) REFERENCES payment_transactions(id),
+    CONSTRAINT fk_payment_notifications_provider_id FOREIGN KEY (payment_provider_id) REFERENCES payment_providers(id)
 );
+
+-- 創建索引
+CREATE INDEX idx_payment_notifications_transaction_id ON payment_notifications(payment_transaction_id);
+CREATE INDEX idx_payment_notifications_provider_id ON payment_notifications(payment_provider_id);
+CREATE INDEX idx_payment_notifications_processed ON payment_notifications(processed);
 ```
 
 ### 8. 支付設置表 (payment_settings)
@@ -246,10 +248,12 @@ CREATE TABLE user_payment_methods (
     metadata JSONB NULL,                       -- 元數據
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_user_payment_methods_user_id (user_id),
-    INDEX idx_user_payment_methods_payment_method_id (payment_method_id),
-    FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id)
+    CONSTRAINT fk_user_payment_methods_payment_method_id FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id)
 );
+
+-- 創建索引
+CREATE INDEX idx_user_payment_methods_user_id ON user_payment_methods(user_id);
+CREATE INDEX idx_user_payment_methods_payment_method_id ON user_payment_methods(payment_method_id);
 ```
 
 ## 索引設計
@@ -498,3 +502,4 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
+

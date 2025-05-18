@@ -1,0 +1,137 @@
+version: '3.8'
+
+services:
+  # API Gateway (測試環境)
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile.test
+    container_name: test-api-gateway
+    ports:
+      - "6000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+    networks:
+      - test-network
+
+  # 認證服務 (測試環境)
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile.test
+    container_name: test-auth-service
+    ports:
+      - "6001:80"
+    depends_on:
+      - auth-db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - ConnectionStrings__DefaultConnection=Server=auth-db;Port=3306;Database=test_user_service;User=test_user;Password=test_password;
+    networks:
+      - test-network
+
+  # 認證服務數據庫 (測試環境)
+  auth-db:
+    image: mysql:8.0
+    container_name: test-auth-db
+    environment:
+      MYSQL_DATABASE: test_user_service
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: test_password
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./services/auth-service/test-init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - test-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # 商品服務 (測試環境)
+  product-service:
+    build:
+      context: ./services/product-service
+      dockerfile: Dockerfile.test
+    container_name: test-product-service
+    ports:
+      - "6002:80"
+    depends_on:
+      - product-db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - MongoDB__ConnectionString=mongodb://test_user:test_password@product-db:27017/test_product_service
+    networks:
+      - test-network
+
+  # 商品服務數據庫 (測試環境)
+  product-db:
+    image: mongo:6.0
+    container_name: test-product-db
+    environment:
+      MONGO_INITDB_DATABASE: test_product_service
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - ./services/product-service/test-init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - test-network
+
+  # 訂單服務 (測試環境)
+  order-service:
+    build:
+      context: ./services/order-service
+      dockerfile: Dockerfile.test
+    container_name: test-order-service
+    ports:
+      - "6004:80"
+    depends_on:
+      - order-db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - ConnectionStrings__DefaultConnection=Host=order-db;Port=5432;Database=test_order_service;Username=test_user;Password=test_password;
+    networks:
+      - test-network
+
+  # 訂單服務數據庫 (測試環境)
+  order-db:
+    image: postgres:14
+    container_name: test-order-db
+    environment:
+      POSTGRES_DB: test_order_service
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+    volumes:
+      - ./services/order-service/test-init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - test-network
+
+  # 支付服務 (測試環境)
+  payment-service:
+    build:
+      context: ./services/payment-service
+      dockerfile: Dockerfile.test
+    container_name: test-payment-service
+    ports:
+      - "6003:80"
+    depends_on:
+      - payment-db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - ConnectionStrings__DefaultConnection=Host=payment-db;Port=5432;Database=test_payment_service;Username=test_user;Password=test_password;
+    networks:
+      - test-network
+
+  # 支付服務數據庫 (測試環境)
+  payment-db:
+    image: postgres:14
+    container_name: test-payment-db
+    environment:
+      POSTGRES_DB: test_payment_service
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+    volumes:
+      - ./services/payment-service/test-init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge

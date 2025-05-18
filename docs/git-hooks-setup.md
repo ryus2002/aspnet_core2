@@ -21,6 +21,18 @@
 chmod +x .git/hooks/pre-commit .git/hooks/commit-msg
 ```
 
+## 自動設置 Git Hooks
+
+我們提供了一個腳本來自動設置 Git hooks。請運行以下命令：
+
+```bash
+# Windows
+.\scripts\setup-git-hooks.bat
+
+# Linux/Mac
+./scripts/setup-git-hooks.sh
+```
+
 ## 手動設置 Git Hooks
 
 如果您需要手動設置 Git hooks，請按照以下步驟操作：
@@ -44,11 +56,7 @@ chmod +x .git/hooks/pre-commit .git/hooks/commit-msg
 ## 提交規範
 
 我們的提交訊息必須遵循以下格式：
-
-```
 <類型>(<範圍>): <描述>
-```
-
 其中：
 
 - **類型**：必須是以下之一：feat, fix, docs, style, refactor, perf, test, chore
