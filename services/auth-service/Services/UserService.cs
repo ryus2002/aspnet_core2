@@ -44,6 +44,13 @@ namespace AuthService.Services
         Task<User> GetByEmail(string email);
         
         /// <summary>
+        /// 根據刷新令牌查詢用戶
+        /// </summary>
+        /// <param name="refreshToken">刷新令牌</param>
+        /// <returns>用戶對象，如果不存在則返回null</returns>
+        Task<User> GetUserByRefreshToken(string refreshToken);
+        
+        /// <summary>
         /// 驗證用戶密碼
         /// </summary>
         /// <param name="user">用戶對象</param>
@@ -57,13 +64,19 @@ namespace AuthService.Services
         /// <param name="userId">用戶ID</param>
         /// <returns>角色名稱列表</returns>
         Task<List<string>> GetUserRoles(string userId);
+        
+        /// <summary>
+        /// 更新用戶信息
+        /// </summary>
+        /// <param name="user">用戶對象</param>
+        /// <returns>更新後的用戶對象</returns>
+        Task<User> UpdateUserAsync(User user);
     }
-    
-    /// <summary>
+        /// <summary>
     /// 用戶服務實現類
-    /// </summary>
+        /// </summary>
     public class UserService : IUserService
-    {
+        {
         private readonly AuthDbContext _context;
         
         /// <summary>
@@ -92,7 +105,7 @@ namespace AuthService.Services
             if (await _context.Users.AnyAsync(u => u.Email == request.Email))
             {
                 throw new ApplicationException("電子郵件已被使用");
-            }
+    }
             
             // 生成密碼鹽值
             var salt = GenerateSalt();
@@ -127,7 +140,7 @@ namespace AuthService.Services
                 };
                 await _context.Roles.AddAsync(defaultRole);
                 await _context.SaveChangesAsync();
-            }
+}
             
             // 為用戶分配默認角色
             var userRole = new UserRole
@@ -181,6 +194,18 @@ namespace AuthService.Services
         }
         
         /// <summary>
+        /// 根據刷新令牌查詢用戶
+        /// </summary>
+        /// <param name="refreshToken">刷新令牌</param>
+        /// <returns>用戶對象，如果不存在則返回null</returns>
+        public async Task<User> GetUserByRefreshToken(string refreshToken)
+        {
+            return await _context.Users
+                .Include(u => u.RefreshTokens)
+                .FirstOrDefaultAsync(u => u.RefreshTokens.Any(rt => rt.Token == refreshToken));
+        }
+        
+        /// <summary>
         /// 驗證用戶密碼
         /// </summary>
         /// <param name="user">用戶對象</param>
@@ -212,6 +237,23 @@ namespace AuthService.Services
                 .ToListAsync();
             
             return roles;
+        }
+        
+        /// <summary>
+        /// 更新用戶信息
+        /// </summary>
+        /// <param name="user">用戶對象</param>
+        /// <returns>更新後的用戶對象</returns>
+        public async Task<User> UpdateUserAsync(User user)
+        {
+            // 更新用戶更新時間
+            user.UpdatedAt = DateTime.UtcNow;
+            
+            // 更新用戶信息
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            
+            return user;
         }
         
         /// <summary>
