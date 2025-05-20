@@ -4,6 +4,48 @@
         <name>PaymentService</name>
     </assembly>
     <members>
+        <member name="T:PaymentService.Controllers.MockPaymentController">
+            <summary>
+            模擬支付控制器
+            僅用於本地開發環境
+            </summary>
+        </member>
+        <member name="M:PaymentService.Controllers.MockPaymentController.#ctor(PaymentService.Services.IMockPaymentService,PaymentService.Services.IPaymentService,Microsoft.Extensions.Logging.ILogger{PaymentService.Controllers.MockPaymentController})">
+            <summary>
+            構造函數
+            </summary>
+        </member>
+        <member name="M:PaymentService.Controllers.MockPaymentController.ProcessPayment(System.String,System.Boolean,System.Int32)">
+            <summary>
+            模擬支付處理
+            </summary>
+            <param name="transactionId">交易ID</param>
+            <param name="shouldSucceed">是否成功</param>
+            <param name="delaySeconds">延遲秒數</param>
+            <returns>處理結果</returns>
+        </member>
+        <member name="M:PaymentService.Controllers.MockPaymentController.ProcessRefund(System.String,System.Boolean,System.Int32)">
+            <summary>
+            模擬退款處理
+            </summary>
+            <param name="refundId">退款ID</param>
+            <param name="shouldSucceed">是否成功</param>
+            <param name="delaySeconds">延遲秒數</param>
+            <returns>處理結果</returns>
+        </member>
+        <member name="M:PaymentService.Controllers.MockPaymentController.GetPaymentMethods">
+            <summary>
+            獲取支付方式列表
+            </summary>
+            <returns>支付方式列表</returns>
+        </member>
+        <member name="M:PaymentService.Controllers.MockPaymentController.GetPaymentPage(System.String)">
+            <summary>
+            模擬支付頁面
+            </summary>
+            <param name="transactionId">交易ID</param>
+            <returns>模擬支付頁面HTML</returns>
+        </member>
         <member name="M:PaymentService.Controllers.PaymentController.#ctor(PaymentService.Services.IPaymentService)">
             <summary>
             建構函數
@@ -99,6 +141,32 @@
             <response code="200">操作成功</response>
             <response code="400">請求參數無效</response>
             <response code="404">支付交易不存在</response>
+        </member>
+        <member name="M:PaymentService.Controllers.RefundController.#ctor(PaymentService.Services.IRefundService,Microsoft.Extensions.Logging.ILogger{PaymentService.Controllers.RefundController})">
+            <summary>
+            構造函數
+            </summary>
+        </member>
+        <member name="M:PaymentService.Controllers.RefundController.CreateRefund(PaymentService.DTOs.CreateRefundRequest)">
+            <summary>
+            創建退款請求
+            </summary>
+            <param name="request">退款請求</param>
+            <returns>創建的退款記錄</returns>
+        </member>
+        <member name="M:PaymentService.Controllers.RefundController.GetRefund(System.String)">
+            <summary>
+            獲取退款詳情
+            </summary>
+            <param name="id">退款ID</param>
+            <returns>退款詳情</returns>
+        </member>
+        <member name="M:PaymentService.Controllers.RefundController.GetRefundsByTransactionId(System.String)">
+            <summary>
+            獲取交易的退款列表
+            </summary>
+            <param name="transactionId">交易ID</param>
+            <returns>退款列表</returns>
         </member>
         <member name="T:PaymentService.Data.PaymentDbContext">
             <summary>
@@ -557,6 +625,29 @@
             關聯的支付方式
             </summary>
         </member>
+        <member name="T:PaymentService.Services.IMockPaymentService">
+            <summary>
+            模擬支付服務接口
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.IMockPaymentService.ProcessPaymentAsync(System.String,System.Boolean,System.Int32)">
+            <summary>
+            模擬支付處理
+            </summary>
+            <param name="transactionId">交易ID</param>
+            <param name="shouldSucceed">是否成功</param>
+            <param name="delaySeconds">延遲秒數</param>
+            <returns>處理結果</returns>
+        </member>
+        <member name="M:PaymentService.Services.IMockPaymentService.ProcessRefundAsync(System.String,System.Boolean,System.Int32)">
+            <summary>
+            模擬退款處理
+            </summary>
+            <param name="refundId">退款ID</param>
+            <param name="shouldSucceed">是否成功</param>
+            <param name="delaySeconds">延遲秒數</param>
+            <returns>處理結果</returns>
+        </member>
         <member name="T:PaymentService.Services.IPaymentService">
             <summary>
             支付服務接口
@@ -647,6 +738,120 @@
             <param name="isSuccess">是否成功</param>
             <param name="responseData">響應數據</param>
             <returns>更新後的退款記錄</returns>
+        </member>
+        <member name="T:PaymentService.Services.MockPaymentService">
+            <summary>
+            模擬支付服務
+            用於本地開發環境，模擬支付處理流程
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.MockPaymentService.#ctor(PaymentService.Data.PaymentDbContext,Microsoft.Extensions.Logging.ILogger{PaymentService.Services.MockPaymentService})">
+            <summary>
+            構造函數
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.MockPaymentService.ProcessPaymentAsync(System.String,System.Boolean,System.Int32)">
+            <summary>
+            模擬支付處理
+            </summary>
+            <param name="transactionId">交易ID</param>
+            <param name="shouldSucceed">是否成功</param>
+            <param name="delaySeconds">延遲秒數</param>
+            <returns>處理結果</returns>
+        </member>
+        <member name="M:PaymentService.Services.MockPaymentService.CreateTransactionRecord(PaymentService.Models.PaymentTransaction,System.Boolean)">
+            <summary>
+            創建交易記錄
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.MockPaymentService.ProcessRefundAsync(System.String,System.Boolean,System.Int32)">
+            <summary>
+            模擬退款處理
+            </summary>
+            <param name="refundId">退款ID</param>
+            <param name="shouldSucceed">是否成功</param>
+            <param name="delaySeconds">延遲秒數</param>
+            <returns>處理結果</returns>
+        </member>
+        <member name="T:PaymentService.Services.MockPaymentResult">
+            <summary>
+            模擬支付結果
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockPaymentResult.Success">
+            <summary>
+            是否成功
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockPaymentResult.Message">
+            <summary>
+            消息
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockPaymentResult.TransactionId">
+            <summary>
+            交易ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockPaymentResult.TransactionStatus">
+            <summary>
+            交易狀態
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockPaymentResult.Amount">
+            <summary>
+            金額
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockPaymentResult.Currency">
+            <summary>
+            貨幣
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockPaymentResult.CompletedAt">
+            <summary>
+            完成時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockPaymentResult.ErrorMessage">
+            <summary>
+            錯誤消息
+            </summary>
+        </member>
+        <member name="T:PaymentService.Services.MockRefundResult">
+            <summary>
+            模擬退款結果
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockRefundResult.Success">
+            <summary>
+            是否成功
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockRefundResult.Message">
+            <summary>
+            消息
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockRefundResult.RefundId">
+            <summary>
+            退款ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockRefundResult.RefundStatus">
+            <summary>
+            退款狀態
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockRefundResult.Amount">
+            <summary>
+            金額
+            </summary>
+        </member>
+        <member name="P:PaymentService.Services.MockRefundResult.ProcessedAt">
+            <summary>
+            處理時間
+            </summary>
         </member>
         <member name="T:PaymentService.Services.PaymentService">
             <summary>

@@ -42,20 +42,36 @@ dotnet run --environment Development
   - [v] 實現商品分類功能
   - [v] 實現簡單商品搜尋
   - [v] 實現商品庫存管理
-
-搜尋doc有哪些文件有寫這些內容
-
-- [ ] 建立初步 API 文檔
-  - [ ] 設置 Swagger/OpenAPI
-  - [ ] 為認證服務建立 API 文檔
-  - [ ] 為商品服務建立 API 文檔
+- [v] 建立初步 API 文檔
+  - [v] 設置 Swagger/OpenAPI
+  - [v] 為認證服務建立 API 文檔
+  - [v] 為商品服務建立 API 文檔
 
 ### 週次3：核心服務開發 - 訂單與支付
+搜尋doc有哪些文件有寫這些內容
+
+docs/database-models/order-service-model.md - 這個文件包含了訂單服務的詳細資料庫模型設計，其中包括：
+
+資料庫選擇（PostgreSQL）及選擇理由
+詳細的表結構設計，包括：
+購物車表 (carts)
+購物車項目表 (cart_items)
+訂單表 (orders)
+訂單項目表 (order_items)
+地址表 (addresses)
+訂單狀態歷史表 (order_status_history)
+訂單事件表 (order_events)
+索引設計
+資料完整性約束
+事務管理策略
+資料遷移策略
+本地開發配置
 - [ ] 開發訂單服務
   - [ ] 建立訂單服務基礎結構
   - [ ] 實現訂單創建 API
   - [ ] 實現訂單狀態管理
   - [ ] 實現訂單查詢功能
+  
 - [ ] 實現模擬支付服務
   - [ ] 建立支付服務基礎結構
   - [ ] 實現模擬支付處理流程
