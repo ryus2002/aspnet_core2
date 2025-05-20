@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PaymentService.Data;
 using PaymentService.Models;
-using PaymentService.Models.DTOs;
+using PaymentService.DTOs; // 修改這裡，使用新的命名空間
 
 namespace PaymentService.Services
 {
@@ -143,7 +143,7 @@ namespace PaymentService.Services
             // 更新交易狀態
             var previousStatus = transaction.Status;
             transaction.Status = "Completed";
-                transaction.PaidAt = DateTime.UtcNow;
+            transaction.PaidAt = DateTime.UtcNow;
             transaction.UpdatedAt = DateTime.UtcNow;
             
             // 添加狀態歷史記錄
@@ -173,7 +173,7 @@ namespace PaymentService.Services
                 CreatedAt = transaction.CreatedAt,
                 CompletedAt = transaction.PaidAt
             };
-    }
+        }
 
         /// <summary>
         /// 取消支付
@@ -187,7 +187,7 @@ namespace PaymentService.Services
             if (transaction == null)
             {
                 throw new Exception($"支付交易不存在: {id}");
-}
+            }
 
             if (transaction.Status == "Completed" || transaction.Status == "Cancelled")
             {

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PaymentService.Data;
 using PaymentService.Models;
-using PaymentService.Models.DTOs;
+using PaymentService.DTOs; // 修改這裡，使用新的命名空間
 
 namespace PaymentService.Services
 {
@@ -97,8 +97,8 @@ namespace PaymentService.Services
             else
             {
                 transaction.Status = "PartiallyRefunded";
-        }
-                        transaction.UpdatedAt = DateTime.UtcNow;
+            }
+            transaction.UpdatedAt = DateTime.UtcNow;
                         
             await _dbContext.SaveChangesAsync();
             
@@ -115,7 +115,7 @@ namespace PaymentService.Services
             return await _dbContext.Refunds
                 .Include(r => r.PaymentTransaction)
                 .FirstOrDefaultAsync(r => r.Id == id);
-    }
+        }
 
         /// <summary>
         /// 獲取交易的所有退款
@@ -126,7 +126,7 @@ namespace PaymentService.Services
                 .Where(r => r.PaymentTransactionId == transactionId)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
-}
+        }
 
         /// <summary>
         /// 處理退款

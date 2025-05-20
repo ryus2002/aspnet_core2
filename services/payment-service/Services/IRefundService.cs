@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using PaymentService.Models;
-using PaymentService.Models.DTOs;
+using PaymentService.DTOs; // 修改這裡，使用新的命名空間
 
 namespace PaymentService.Services
 {
-        /// <summary>
+    /// <summary>
     /// 退款服務接口
-        /// </summary>
+    /// </summary>
     public interface IRefundService
     {
         /// <summary>

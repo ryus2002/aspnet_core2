@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using PaymentService.Models;
-using PaymentService.Models.DTOs;
+using PaymentService.DTOs; // 修改這裡，使用新的命名空間
 
 namespace PaymentService.Services
 {
@@ -51,9 +51,9 @@ namespace PaymentService.Services
         /// </summary>
         Task<Refund?> GetRefundById(string id);
 
-    /// <summary>
+        /// <summary>
         /// 獲取活躍的支付方式
-    /// </summary>
+        /// </summary>
         Task<List<PaymentMethod>> GetActivePaymentMethods();
 
         /// <summary>
