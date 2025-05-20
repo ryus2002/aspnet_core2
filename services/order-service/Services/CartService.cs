@@ -9,7 +9,7 @@ namespace OrderService.Services
     /// <summary>
     /// 購物車服務實現
     /// </summary>
-    public class CartService : ICartService
+    public partial class CartService : ICartService
     {
         private readonly OrderDbContext _dbContext;
         private readonly ILogger<CartService> _logger;

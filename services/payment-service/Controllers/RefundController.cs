@@ -132,6 +132,6 @@ namespace PaymentService.Controllers
             }).ToList();
             
             return Ok(response);
+        }
     }
-}
 }

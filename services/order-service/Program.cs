@@ -4,6 +4,7 @@ using OrderService.Data;
 using OrderService.Services;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
