@@ -5,6 +5,7 @@ using PaymentService.Services;
 using System.Threading.Tasks;
 using Swashbuckle.AspNetCore.Annotations;
 
+
 namespace PaymentService.Controllers
 {
     [ApiController]
@@ -48,6 +49,7 @@ namespace PaymentService.Controllers
         public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentRequest request)
         {
             var payment = await _paymentService.CreatePaymentAsync(request);
+            // 修改這裡，使用 TransactionId 而不是 Id
             return CreatedAtAction(nameof(GetPayment), new { id = payment.TransactionId }, payment);
         }
 

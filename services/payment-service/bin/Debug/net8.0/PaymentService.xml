@@ -1,0 +1,742 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PaymentService</name>
+    </assembly>
+    <members>
+        <member name="M:PaymentService.Controllers.PaymentController.#ctor(PaymentService.Services.IPaymentService)">
+            <summary>
+            建構函數
+            </summary>
+            <param name="paymentService">支付服務</param>
+        </member>
+        <member name="M:PaymentService.Controllers.PaymentController.CreatePayment(PaymentService.DTOs.CreatePaymentRequest)">
+            <summary>
+            創建支付交易
+            </summary>
+            <remarks>
+            創建新的支付交易
+            </remarks>
+            <param name="request">創建支付請求</param>
+            <returns>創建的支付交易</returns>
+            <response code="201">支付交易創建成功</response>
+            <response code="400">請求參數無效</response>
+            <response code="401">未認證</response>
+        </member>
+        <member name="M:PaymentService.Controllers.PaymentController.GetPayment(System.String)">
+            <summary>
+            獲取支付交易
+            </summary>
+            <remarks>
+            根據ID獲取支付交易詳情
+            </remarks>
+            <param name="id">支付交易ID</param>
+            <returns>支付交易詳情</returns>
+            <response code="200">成功</response>
+            <response code="404">支付交易不存在</response>
+        </member>
+        <member name="M:PaymentService.Controllers.PaymentController.GetPaymentByOrderId(System.String)">
+            <summary>
+            根據訂單ID獲取支付交易
+            </summary>
+            <remarks>
+            根據訂單ID獲取相關的支付交易
+            </remarks>
+            <param name="orderId">訂單ID</param>
+            <returns>支付交易列表</returns>
+            <response code="200">成功</response>
+            <response code="404">訂單不存在</response>
+        </member>
+        <member name="M:PaymentService.Controllers.PaymentController.GetPaymentMethods">
+            <summary>
+            獲取支付方式
+            </summary>
+            <remarks>
+            獲取所有可用的支付方式
+            </remarks>
+            <returns>支付方式列表</returns>
+            <response code="200">成功</response>
+        </member>
+        <member name="M:PaymentService.Controllers.PaymentController.CapturePayment(System.String)">
+            <summary>
+            完成支付
+            </summary>
+            <remarks>
+            完成指定的支付交易
+            </remarks>
+            <param name="id">支付交易ID</param>
+            <returns>更新後的支付交易</returns>
+            <response code="200">支付完成成功</response>
+            <response code="400">請求參數無效</response>
+            <response code="401">未認證</response>
+            <response code="404">支付交易不存在</response>
+        </member>
+        <member name="M:PaymentService.Controllers.PaymentController.CancelPayment(System.String,PaymentService.DTOs.CancelPaymentRequest)">
+            <summary>
+            取消支付
+            </summary>
+            <remarks>
+            取消指定的支付交易
+            </remarks>
+            <param name="id">支付交易ID</param>
+            <param name="request">取消支付請求</param>
+            <returns>更新後的支付交易</returns>
+            <response code="200">支付取消成功</response>
+            <response code="400">請求參數無效</response>
+            <response code="401">未認證</response>
+            <response code="404">支付交易不存在</response>
+        </member>
+        <member name="M:PaymentService.Controllers.PaymentController.MockCompletePayment(System.String,System.Boolean)">
+            <summary>
+            模擬完成支付
+            </summary>
+            <remarks>
+            僅用於本地開發環境，模擬完成支付
+            </remarks>
+            <param name="id">支付交易ID</param>
+            <param name="success">是否成功</param>
+            <returns>操作結果</returns>
+            <response code="200">操作成功</response>
+            <response code="400">請求參數無效</response>
+            <response code="404">支付交易不存在</response>
+        </member>
+        <member name="T:PaymentService.Data.PaymentDbContext">
+            <summary>
+            支付服務數據庫上下文
+            </summary>
+        </member>
+        <member name="T:PaymentService.DTOs.CancelPaymentRequest">
+            <summary>
+            取消支付請求
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.CancelPaymentRequest.Reason">
+            <summary>
+            取消原因
+            </summary>
+        </member>
+        <member name="T:PaymentService.DTOs.PaymentResponse">
+            <summary>
+            支付響應DTO
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.TransactionId">
+            <summary>
+            交易ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.OrderId">
+            <summary>
+            訂單ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.Amount">
+            <summary>
+            交易金額
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.CurrencyCode">
+            <summary>
+            貨幣代碼
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.Status">
+            <summary>
+            交易狀態
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.PaymentMethodCode">
+            <summary>
+            支付方式代碼
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.PaymentMethodId">
+            <summary>
+            支付方式ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.CompletedAt">
+            <summary>
+            完成時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.RedirectUrl">
+            <summary>
+            重定向URL
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.PaymentUrl">
+            <summary>
+            支付URL
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.ErrorMessage">
+            <summary>
+            錯誤消息
+            </summary>
+        </member>
+        <member name="P:PaymentService.DTOs.PaymentResponse.Currency">
+            <summary>
+            貨幣（兼容舊版屬性）
+            </summary>
+        </member>
+        <member name="T:PaymentService.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:PaymentService.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:PaymentService.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:PaymentService.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:PaymentService.Models.NotificationProcessResult">
+            <summary>
+            通知處理結果
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.NotificationProcessResult.Success">
+            <summary>
+            處理是否成功
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.NotificationProcessResult.Message">
+            <summary>
+            處理結果消息
+            </summary>
+        </member>
+        <member name="T:PaymentService.Models.PaymentNotification">
+            <summary>
+            支付通知
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentNotification.Id">
+            <summary>
+            通知ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentNotification.PaymentTransactionId">
+            <summary>
+            支付交易ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentNotification.ProviderCode">
+            <summary>
+            支付提供商代碼
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentNotification.RawData">
+            <summary>
+            原始數據
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentNotification.IsProcessed">
+            <summary>
+            是否已處理
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentNotification.ProcessedAt">
+            <summary>
+            處理時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentNotification.ProcessingResult">
+            <summary>
+            處理結果
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentNotification.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentNotification.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentNotification.RequestHeaders">
+            <summary>
+            請求頭
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentNotification.IpAddress">
+            <summary>
+            IP地址
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentNotification.PaymentTransaction">
+            <summary>
+            關聯的支付交易
+            </summary>
+        </member>
+        <member name="T:PaymentService.Models.PaymentProvider">
+            <summary>
+            支付提供商
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentProvider.Code">
+            <summary>
+            支付提供商代碼
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentProvider.Name">
+            <summary>
+            支付提供商名稱
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentProvider.Description">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentProvider.Configuration">
+            <summary>
+            配置信息（JSON格式）
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentProvider.IsActive">
+            <summary>
+            是否啟用
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentProvider.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentProvider.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentProvider.PaymentMethodProviders">
+            <summary>
+            支付方式提供商關聯
+            </summary>
+        </member>
+        <member name="T:PaymentService.Models.PaymentSetting">
+            <summary>
+            支付系統設置
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentSetting.Key">
+            <summary>
+            設置鍵
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentSetting.Value">
+            <summary>
+            設置值
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentSetting.Description">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentSetting.IsEncrypted">
+            <summary>
+            是否加密
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentSetting.IsSystemSetting">
+            <summary>
+            是否系統設置
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentSetting.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentSetting.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentSetting.LastModifiedBy">
+            <summary>
+            最後修改人
+            </summary>
+        </member>
+        <member name="T:PaymentService.Models.PaymentStatusHistory">
+            <summary>
+            支付狀態歷史
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentStatusHistory.Id">
+            <summary>
+            歷史ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentStatusHistory.PaymentTransactionId">
+            <summary>
+            支付交易ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentStatusHistory.PreviousStatus">
+            <summary>
+            前一個狀態
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentStatusHistory.CurrentStatus">
+            <summary>
+            當前狀態
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentStatusHistory.Reason">
+            <summary>
+            狀態變更原因
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentStatusHistory.ChangedAt">
+            <summary>
+            狀態變更時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentStatusHistory.CreatedAt">
+            <summary>
+            創建時間（與ChangedAt同義，為了保持一致性）
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentStatusHistory.ChangedBy">
+            <summary>
+            操作人
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentStatusHistory.AdditionalData">
+            <summary>
+            附加數據
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.PaymentStatusHistory.PaymentTransaction">
+            <summary>
+            關聯的支付交易
+            </summary>
+        </member>
+        <member name="T:PaymentService.Models.Refund">
+            <summary>
+            退款記錄
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.Refund.Id">
+            <summary>
+            退款ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.Refund.PaymentTransactionId">
+            <summary>
+            支付交易ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.Refund.Amount">
+            <summary>
+            退款金額
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.Refund.Reason">
+            <summary>
+            退款原因
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.Refund.Status">
+            <summary>
+            退款狀態
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.Refund.ExternalRefundId">
+            <summary>
+            外部退款ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.Refund.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.Refund.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.Refund.ProcessedAt">
+            <summary>
+            處理時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.Refund.RequestedBy">
+            <summary>
+            請求人
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.Refund.ResponseData">
+            <summary>
+            響應數據
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.Refund.PaymentTransaction">
+            <summary>
+            關聯的支付交易
+            </summary>
+        </member>
+        <member name="T:PaymentService.Models.UserPaymentMethod">
+            <summary>
+            用戶支付方式
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.Id">
+            <summary>
+            用戶支付方式ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.UserId">
+            <summary>
+            用戶ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.PaymentMethodId">
+            <summary>
+            支付方式ID
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.Last4">
+            <summary>
+            卡號或賬號後四位
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.PaymentToken">
+            <summary>
+            支付令牌（加密存儲）
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.ExpiryYear">
+            <summary>
+            過期年份
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.ExpiryMonth">
+            <summary>
+            過期月份
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.CardType">
+            <summary>
+            卡片類型
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.IsDefault">
+            <summary>
+            是否為默認支付方式
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.IsActive">
+            <summary>
+            是否啟用
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="P:PaymentService.Models.UserPaymentMethod.PaymentMethod">
+            <summary>
+            關聯的支付方式
+            </summary>
+        </member>
+        <member name="T:PaymentService.Services.IPaymentService">
+            <summary>
+            支付服務接口
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.IPaymentService.CreatePaymentAsync(PaymentService.DTOs.CreatePaymentRequest)">
+            <summary>
+            創建支付交易
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.IPaymentService.GetPaymentAsync(System.String)">
+            <summary>
+            根據ID獲取支付交易
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.IPaymentService.GetPaymentsByOrderIdAsync(System.String)">
+            <summary>
+            獲取訂單的支付交易列表
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.IPaymentService.CapturePaymentAsync(System.String)">
+            <summary>
+            完成支付
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.IPaymentService.CancelPaymentAsync(System.String,System.String)">
+            <summary>
+            取消支付
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.IPaymentService.ProcessPaymentNotification(System.String,System.String,Microsoft.AspNetCore.Http.IHeaderDictionary)">
+            <summary>
+            處理支付通知
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.IPaymentService.CreateRefund(PaymentService.DTOs.CreateRefundRequest,System.String)">
+            <summary>
+            創建退款
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.IPaymentService.GetRefundById(System.String)">
+            <summary>
+            根據ID獲取退款
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.IPaymentService.GetActivePaymentMethods">
+            <summary>
+            獲取活躍的支付方式
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.IPaymentService.MockCompletePayment(System.String,System.Boolean)">
+            <summary>
+            模擬完成支付（僅用於本地開發環境）
+            </summary>
+        </member>
+        <member name="T:PaymentService.Services.IRefundService">
+            <summary>
+            退款服務接口
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.IRefundService.CreateRefundRequestAsync(PaymentService.DTOs.CreateRefundRequest,System.String)">
+            <summary>
+            創建退款請求
+            </summary>
+            <param name="request">退款請求</param>
+            <param name="userId">用戶ID</param>
+            <returns>退款記錄</returns>
+        </member>
+        <member name="M:PaymentService.Services.IRefundService.GetRefundByIdAsync(System.String)">
+            <summary>
+            根據ID獲取退款
+            </summary>
+            <param name="id">退款ID</param>
+            <returns>退款記錄</returns>
+        </member>
+        <member name="M:PaymentService.Services.IRefundService.GetRefundsByTransactionIdAsync(System.String)">
+            <summary>
+            獲取交易的所有退款
+            </summary>
+            <param name="transactionId">交易ID</param>
+            <returns>退款列表</returns>
+        </member>
+        <member name="M:PaymentService.Services.IRefundService.ProcessRefundAsync(System.String,System.Boolean,System.String)">
+            <summary>
+            處理退款
+            </summary>
+            <param name="id">退款ID</param>
+            <param name="isSuccess">是否成功</param>
+            <param name="responseData">響應數據</param>
+            <returns>更新後的退款記錄</returns>
+        </member>
+        <member name="T:PaymentService.Services.PaymentService">
+            <summary>
+            支付服務實現
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.PaymentService.#ctor(PaymentService.Data.PaymentDbContext,Microsoft.Extensions.Logging.ILogger{PaymentService.Services.PaymentService})">
+            <summary>
+            構造函數
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.PaymentService.CreatePaymentAsync(PaymentService.DTOs.CreatePaymentRequest)">
+            <summary>
+            創建支付交易
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.PaymentService.GetPaymentAsync(System.String)">
+            <summary>
+            根據ID獲取支付交易
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.PaymentService.GetPaymentsByOrderIdAsync(System.String)">
+            <summary>
+            獲取訂單的支付交易列表
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.PaymentService.CapturePaymentAsync(System.String)">
+            <summary>
+            完成支付
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.PaymentService.CancelPaymentAsync(System.String,System.String)">
+            <summary>
+            取消支付
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.PaymentService.ProcessPaymentNotification(System.String,System.String,Microsoft.AspNetCore.Http.IHeaderDictionary)">
+            <summary>
+            處理支付通知
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.PaymentService.CreateRefund(PaymentService.DTOs.CreateRefundRequest,System.String)">
+            <summary>
+            創建退款
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.PaymentService.GetRefundById(System.String)">
+            <summary>
+            根據ID獲取退款
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.PaymentService.GetActivePaymentMethods">
+            <summary>
+            獲取活躍的支付方式
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.PaymentService.MockCompletePayment(System.String,System.Boolean)">
+            <summary>
+            模擬完成支付（僅用於本地開發環境）
+            </summary>
+        </member>
+        <member name="T:PaymentService.Services.RefundService">
+            <summary>
+            退款服務實現
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.RefundService.#ctor(PaymentService.Data.PaymentDbContext,Microsoft.Extensions.Logging.ILogger{PaymentService.Services.RefundService})">
+            <summary>
+            構造函數
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.RefundService.CreateRefundRequestAsync(PaymentService.DTOs.CreateRefundRequest,System.String)">
+            <summary>
+            創建退款請求
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.RefundService.GetRefundByIdAsync(System.String)">
+            <summary>
+            獲取退款詳情
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.RefundService.GetRefundsByTransactionIdAsync(System.String)">
+            <summary>
+            獲取交易的所有退款
+            </summary>
+        </member>
+        <member name="M:PaymentService.Services.RefundService.ProcessRefundAsync(System.String,System.Boolean,System.String)">
+            <summary>
+            處理退款
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -7,6 +7,7 @@ using ProductService.Services;
 using Serilog;
 using System.Text;
 using MongoDB.Bson;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +26,16 @@ builder.Services.AddEndpointsApiExplorer();
 // 配置 Swagger
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "商品服務 API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { 
+        Title = "商品服務 API", 
+        Version = "v1",
+        Description = "提供商品管理、類別管理和庫存管理功能",
+        Contact = new OpenApiContact
+        {
+            Name = "API Support",
+            Email = "support@example.com"
+        }
+    });
     
     // 添加JWT認證支持
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -51,6 +61,20 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+    
+    // 啟用 XML 註解
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
+    
+    // 自定義 Swagger 文檔
+    c.EnableAnnotations(); // 啟用 Swashbuckle.AspNetCore.Annotations
+    
+    // 添加分組標籤
+    c.TagActionsBy(api => new[] { api.GroupName ?? api.ActionDescriptor.RouteValues["controller"] });
 });
 
 // 配置 MongoDB
@@ -96,8 +120,15 @@ var app = builder.Build();
 // 配置 HTTP 請求管道
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(c => {
+        c.RouteTemplate = "swagger/{documentName}/swagger.json";
+    });
+    app.UseSwaggerUI(c => {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "商品服務 API v1");
+        c.RoutePrefix = string.Empty; // 設置 Swagger UI 在根路徑
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None); // 預設折疊所有操作
+        c.DefaultModelsExpandDepth(-1); // 隱藏 Models 部分
+    });
 }
 
 app.UseHttpsRedirection();
