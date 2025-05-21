@@ -1,75 +1,79 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using AuthService.Data;
 using AuthService.DTOs;
 using AuthService.Models;
 using AuthService.Services;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Moq;
-using Moq.EntityFrameworkCore;
 using Xunit;
 
 namespace AuthService.Tests.Services
 {
-    public class UserServiceTests
+    public partial class UserServiceTests
     {
-        private readonly Mock<AuthDbContext> _mockContext;
+        private readonly AuthDbContext _context;
         private readonly IUserService _userService;
 
         public UserServiceTests()
         {
-            _mockContext = new Mock<AuthDbContext>();
-            _userService = new UserService(_mockContext.Object);
+            // 使用 InMemory 數據庫創建 DbContext
+            var options = new DbContextOptionsBuilder<AuthDbContext>()
+                .UseInMemoryDatabase(databaseName: $"AuthDb_{Guid.NewGuid()}")
+                .Options;
+            
+            _context = new AuthDbContext(options);
+            _userService = new UserService(_context);
         }
 
         [Fact]
         public async Task Register_WithValidRequest_ShouldCreateUser()
         {
             // Arrange
-            var users = new List<User>();
-            var roles = new List<Role>
-            {
-                new Role { Id = "role1", Name = "User", Description = "普通用戶", IsSystem = true }
-            };
-            var userRoles = new List<UserRole>();
-
-            _mockContext.Setup(c => c.Users).ReturnsDbSet(users);
-            _mockContext.Setup(c => c.Roles).ReturnsDbSet(roles);
-            _mockContext.Setup(c => c.UserRoles).ReturnsDbSet(userRoles);
-
-            _mockContext.Setup(c => c.Users.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
-                .Callback((User user, CancellationToken token) => users.Add(user));
-
-            _mockContext.Setup(c => c.UserRoles.AddAsync(It.IsAny<UserRole>(), It.IsAny<CancellationToken>()))
-                .Callback((UserRole userRole, CancellationToken token) => userRoles.Add(userRole));
-
-            var request = new RegisterRequest
+            var registerRequest = new RegisterRequest
             {
                 Username = "newuser",
-                Email = "newuser@example.com",
-                FullName = "New User",
-                Password = "Password123!"
+                Email = "new@example.com",
+                Password = "Password123!",
+                ConfirmPassword = "Password123!",
+                FullName = "New User"
             };
 
+            // 創建一個系統角色，供 Register 方法使用
+            var role = new Role { 
+                Id = "2", 
+                Name = "User", 
+                IsSystem = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Description = "Regular user role" // 添加必填屬性
+            };
+            await _context.Roles.AddAsync(role);
+            await _context.SaveChangesAsync();
+
             // Act
-            var result = await _userService.Register(request);
+            var result = await _userService.Register(registerRequest);
 
             // Assert
             result.Should().NotBeNull();
-            result.Username.Should().Be(request.Username);
-            result.Email.Should().Be(request.Email);
-            result.FullName.Should().Be(request.FullName);
-            result.PasswordHash.Should().NotBeNullOrEmpty();
-            result.Salt.Should().NotBeNullOrEmpty();
-
-            users.Should().ContainSingle();
-            userRoles.Should().ContainSingle();
-            userRoles[0].UserId.Should().Be(result.Id);
-            userRoles[0].RoleId.Should().Be(roles[0].Id);
-
-            _mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.AtLeastOnce);
+            result.Username.Should().Be(registerRequest.Username);
+            result.Email.Should().Be(registerRequest.Email);
+            result.FullName.Should().Be(registerRequest.FullName);
+            
+            // 驗證用戶已保存到數據庫
+            var savedUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == registerRequest.Username);
+            savedUser.Should().NotBeNull();
+            savedUser!.Email.Should().Be(registerRequest.Email);
+            
+            // 驗證密碼已哈希
+            savedUser.PasswordHash.Should().NotBeNullOrEmpty();
+            savedUser.Salt.Should().NotBeNullOrEmpty();
+            
+            // 驗證用戶角色已分配
+            var userRole = await _context.UserRoles.FirstOrDefaultAsync(ur => ur.UserId == savedUser.Id);
+            userRole.Should().NotBeNull();
+            userRole!.RoleId.Should().Be(role.Id);
         }
 
         [Fact]
@@ -78,25 +82,29 @@ namespace AuthService.Tests.Services
             // Arrange
             var existingUser = new User
             {
-                Id = "user1",
                 Username = "existinguser",
-                Email = "existing@example.com"
+                Email = "existing@example.com",
+                PasswordHash = "hash",
+                Salt = "salt",
+                FullName = "Existing User", // 添加必填屬性
+                LastLoginIp = "127.0.0.1" // 添加必填屬性
             };
+            await _context.Users.AddAsync(existingUser);
+            await _context.SaveChangesAsync();
 
-            var users = new List<User> { existingUser };
-
-            _mockContext.Setup(c => c.Users).ReturnsDbSet(users);
-
-            var request = new RegisterRequest
+            var registerRequest = new RegisterRequest
             {
-                Username = "existinguser", // 使用已存在的用戶名
-                Email = "newuser@example.com",
-                FullName = "New User",
-                Password = "Password123!"
+                Username = "existinguser", // 相同的用戶名
+                Email = "new@example.com",
+                Password = "Password123!",
+                ConfirmPassword = "Password123!",
+                FullName = "New User"
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ApplicationException>(() => _userService.Register(request));
+            await _userService.Invoking(s => s.Register(registerRequest))
+                .Should().ThrowAsync<ApplicationException>()
+                .WithMessage($"用戶名 '{registerRequest.Username}' 已被使用");
         }
 
         [Fact]
@@ -105,25 +113,29 @@ namespace AuthService.Tests.Services
             // Arrange
             var existingUser = new User
             {
-                Id = "user1",
                 Username = "existinguser",
-                Email = "existing@example.com"
+                Email = "existing@example.com",
+                PasswordHash = "hash",
+                Salt = "salt",
+                FullName = "Existing User", // 添加必填屬性
+                LastLoginIp = "127.0.0.1" // 添加必填屬性
             };
+            await _context.Users.AddAsync(existingUser);
+            await _context.SaveChangesAsync();
 
-            var users = new List<User> { existingUser };
-
-            _mockContext.Setup(c => c.Users).ReturnsDbSet(users);
-
-            var request = new RegisterRequest
+            var registerRequest = new RegisterRequest
             {
                 Username = "newuser",
-                Email = "existing@example.com", // 使用已存在的電子郵件
-                FullName = "New User",
-                Password = "Password123!"
+                Email = "existing@example.com", // 相同的電子郵件
+                Password = "Password123!",
+                ConfirmPassword = "Password123!",
+                FullName = "New User"
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ApplicationException>(() => _userService.Register(request));
+            await _userService.Invoking(s => s.Register(registerRequest))
+                .Should().ThrowAsync<ApplicationException>()
+                .WithMessage($"電子郵件 '{registerRequest.Email}' 已被使用");
         }
     }
 }

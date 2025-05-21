@@ -19,31 +19,31 @@ namespace AuthService.Models
         /// </summary>
         [Required]
         [StringLength(50)]
-        public string Username { get; set; }
+        public required string Username { get; set; }
         
         /// <summary>
         /// 用戶電子郵件地址，用於通知和密碼重置
         /// </summary>
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public required string Email { get; set; }
         
         /// <summary>
         /// 用戶密碼的雜湊值，不存儲明文密碼
         /// </summary>
         [Required]
-        public string PasswordHash { get; set; }
+        public required string PasswordHash { get; set; }
         
         /// <summary>
         /// 密碼加密的鹽值
         /// </summary>
-        public string Salt { get; set; }
+        public required string Salt { get; set; }
         
         /// <summary>
         /// 用戶的全名
         /// </summary>
         [StringLength(100)]
-        public string FullName { get; set; }
+        public required string FullName { get; set; }
         
         /// <summary>
         /// 用戶是否已激活賬戶
@@ -73,7 +73,7 @@ namespace AuthService.Models
         /// <summary>
         /// 用戶最後登入IP
         /// </summary>
-        public string LastLoginIp { get; set; }
+        public required string LastLoginIp { get; set; }
         
         /// <summary>
         /// 用戶刷新令牌集合

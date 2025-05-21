@@ -19,13 +19,13 @@ namespace AuthService.Models
         /// </summary>
         [Required]
         [StringLength(50)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         
         /// <summary>
         /// 角色描述
         /// </summary>
         [StringLength(200)]
-        public string Description { get; set; }
+        public required string Description { get; set; }
         
         /// <summary>
         /// 是否為系統預設角色

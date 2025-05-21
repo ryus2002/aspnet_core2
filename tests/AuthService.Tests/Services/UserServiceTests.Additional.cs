@@ -6,10 +6,7 @@ using AuthService.Models;
 using AuthService.Services;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Moq;
-using Moq.EntityFrameworkCore;
 using Xunit;
-
 namespace AuthService.Tests.Services
 {
     // 擴展 UserServiceTests 類別，添加更多測試方法
@@ -24,32 +21,32 @@ namespace AuthService.Tests.Services
                 Id = "user1",
                 Username = "testuser",
                 Email = "test@example.com",
+                PasswordHash = "hash", // 添加必填屬性
+                Salt = "salt", // 添加必填屬性
+                FullName = "Test User", // 添加必填屬性
+                LastLoginIp = "127.0.0.1", // 添加必填屬性
                 RefreshTokens = new List<RefreshToken>()
             };
-
-            var users = new List<User> { user };
-            _mockContext.Setup(c => c.Users).ReturnsDbSet(users);
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
 
             // Act
             var result = await _userService.GetByUsername("testuser");
 
             // Assert
             result.Should().NotBeNull();
-            result.Id.Should().Be(user.Id);
-            result.Username.Should().Be(user.Username);
-            result.Email.Should().Be(user.Email);
+            result?.Id.Should().Be(user.Id);
+            result?.Username.Should().Be(user.Username);
+            result?.Email.Should().Be(user.Email);
         }
 
         [Fact]
         public async Task GetByUsername_WithNonExistingUser_ShouldReturnNull()
         {
             // Arrange
-            var users = new List<User>();
-            _mockContext.Setup(c => c.Users).ReturnsDbSet(users);
-
+            // 不添加任何用戶
             // Act
             var result = await _userService.GetByUsername("nonexistentuser");
-
             // Assert
             result.Should().BeNull();
         }
@@ -63,32 +60,32 @@ namespace AuthService.Tests.Services
                 Id = "user1",
                 Username = "testuser",
                 Email = "test@example.com",
+                PasswordHash = "hash", // 添加必填屬性
+                Salt = "salt", // 添加必填屬性
+                FullName = "Test User", // 添加必填屬性
+                LastLoginIp = "127.0.0.1", // 添加必填屬性
                 RefreshTokens = new List<RefreshToken>()
             };
-
-            var users = new List<User> { user };
-            _mockContext.Setup(c => c.Users).ReturnsDbSet(users);
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
 
             // Act
             var result = await _userService.GetById("user1");
 
             // Assert
             result.Should().NotBeNull();
-            result.Id.Should().Be(user.Id);
-            result.Username.Should().Be(user.Username);
-            result.Email.Should().Be(user.Email);
+            result?.Id.Should().Be(user.Id);
+            result?.Username.Should().Be(user.Username);
+            result?.Email.Should().Be(user.Email);
         }
 
         [Fact]
         public async Task GetById_WithNonExistingUser_ShouldReturnNull()
         {
             // Arrange
-            var users = new List<User>();
-            _mockContext.Setup(c => c.Users).ReturnsDbSet(users);
-
+            // 不添加任何用戶
             // Act
             var result = await _userService.GetById("nonexistentid");
-
             // Assert
             result.Should().BeNull();
         }
@@ -102,20 +99,23 @@ namespace AuthService.Tests.Services
                 Id = "user1",
                 Username = "testuser",
                 Email = "test@example.com",
+                PasswordHash = "hash", // 添加必填屬性
+                Salt = "salt", // 添加必填屬性
+                FullName = "Test User", // 添加必填屬性
+                LastLoginIp = "127.0.0.1", // 添加必填屬性
                 RefreshTokens = new List<RefreshToken>()
             };
-
-            var users = new List<User> { user };
-            _mockContext.Setup(c => c.Users).ReturnsDbSet(users);
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
 
             // Act
             var result = await _userService.GetByEmail("test@example.com");
 
             // Assert
             result.Should().NotBeNull();
-            result.Id.Should().Be(user.Id);
-            result.Username.Should().Be(user.Username);
-            result.Email.Should().Be(user.Email);
+            result?.Id.Should().Be(user.Id);
+            result?.Username.Should().Be(user.Username);
+            result?.Email.Should().Be(user.Email);
         }
 
         [Fact]
@@ -127,7 +127,13 @@ namespace AuthService.Tests.Services
                 Id = "token1",
                 Token = "valid-refresh-token",
                 UserId = "user1",
-                ExpiresAt = DateTime.UtcNow.AddDays(7)
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                CreatedAt = DateTime.UtcNow,
+                CreatedByIp = "127.0.0.1",
+                // 添加必填屬性，即使它們是空的或默認值
+                ReplacedByToken = string.Empty,
+                RevokedByIp = string.Empty,
+                IsRevoked = false
             };
 
             var user = new User
@@ -135,18 +141,27 @@ namespace AuthService.Tests.Services
                 Id = "user1",
                 Username = "testuser",
                 Email = "test@example.com",
-                RefreshTokens = new List<RefreshToken> { refreshToken }
+                PasswordHash = "hash",
+                Salt = "salt",
+                FullName = "Test User",
+                LastLoginIp = "127.0.0.1",
+                RefreshTokens = new List<RefreshToken>()
             };
 
-            var users = new List<User> { user };
-            _mockContext.Setup(c => c.Users).ReturnsDbSet(users);
+            // 重要：先添加用戶，然後再添加刷新令牌
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            // 然後添加刷新令牌
+            await _context.RefreshTokens.AddAsync(refreshToken);
+            await _context.SaveChangesAsync();
 
             // Act
             var result = await _userService.GetUserByRefreshToken("valid-refresh-token");
 
             // Assert
             result.Should().NotBeNull();
-            result.Id.Should().Be(user.Id);
+            result?.Id.Should().Be(user.Id);
         }
 
         [Fact]
@@ -165,8 +180,12 @@ namespace AuthService.Tests.Services
             var user = new User
             {
                 Id = "user1",
+                Username = "testuser", // 添加必填屬性
+                Email = "test@example.com", // 添加必填屬性
                 PasswordHash = passwordHash,
-                Salt = salt
+                Salt = salt,
+                FullName = "Test User", // 添加必填屬性
+                LastLoginIp = "127.0.0.1" // 添加必填屬性
             };
 
             // Act
@@ -193,8 +212,12 @@ namespace AuthService.Tests.Services
             var user = new User
             {
                 Id = "user1",
+                Username = "testuser", // 添加必填屬性
+                Email = "test@example.com", // 添加必填屬性
                 PasswordHash = passwordHash,
-                Salt = salt
+                Salt = salt,
+                FullName = "Test User", // 添加必填屬性
+                LastLoginIp = "127.0.0.1" // 添加必填屬性
             };
 
             // Act

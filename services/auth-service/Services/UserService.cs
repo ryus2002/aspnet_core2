@@ -1,290 +1,184 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using AuthService.DTOs;
 using AuthService.Models;
+using AuthService.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace AuthService.Services
 {
     /// <summary>
-    /// 用戶服務接口，定義用戶相關的業務邏輯操作
+    /// 用戶服務實現
     /// </summary>
-    public interface IUserService
-    {
-        /// <summary>
-        /// 註冊新用戶
-        /// </summary>
-        /// <param name="request">註冊請求</param>
-        /// <returns>註冊成功的用戶</returns>
-        Task<User> Register(RegisterRequest request);
-        
-        /// <summary>
-        /// 根據用戶名查詢用戶
-        /// </summary>
-        /// <param name="username">用戶名</param>
-        /// <returns>用戶對象，如果不存在則返回null</returns>
-        Task<User> GetByUsername(string username);
-        
-        /// <summary>
-        /// 根據ID查詢用戶
-        /// </summary>
-        /// <param name="id">用戶ID</param>
-        /// <returns>用戶對象，如果不存在則返回null</returns>
-        Task<User> GetById(string id);
-        
-        /// <summary>
-        /// 根據電子郵件查詢用戶
-        /// </summary>
-        /// <param name="email">電子郵件</param>
-        /// <returns>用戶對象，如果不存在則返回null</returns>
-        Task<User> GetByEmail(string email);
-        
-        /// <summary>
-        /// 根據刷新令牌查詢用戶
-        /// </summary>
-        /// <param name="refreshToken">刷新令牌</param>
-        /// <returns>用戶對象，如果不存在則返回null</returns>
-        Task<User> GetUserByRefreshToken(string refreshToken);
-        
-        /// <summary>
-        /// 驗證用戶密碼
-        /// </summary>
-        /// <param name="user">用戶對象</param>
-        /// <param name="password">待驗證的密碼</param>
-        /// <returns>密碼是否正確</returns>
-        Task<bool> ValidatePassword(User user, string password);
-        
-        /// <summary>
-        /// 獲取用戶的角色列表
-        /// </summary>
-        /// <param name="userId">用戶ID</param>
-        /// <returns>角色名稱列表</returns>
-        Task<List<string>> GetUserRoles(string userId);
-        
-        /// <summary>
-        /// 更新用戶信息
-        /// </summary>
-        /// <param name="user">用戶對象</param>
-        /// <returns>更新後的用戶對象</returns>
-        Task<User> UpdateUserAsync(User user);
-    }
-        /// <summary>
-    /// 用戶服務實現類
-        /// </summary>
     public class UserService : IUserService
-        {
+    {
         private readonly AuthDbContext _context;
-        
+
         /// <summary>
-        /// 構造函數，注入數據庫上下文
+        /// 建構函數
         /// </summary>
-        /// <param name="context">數據庫上下文</param>
+        /// <param name="context">資料庫上下文</param>
         public UserService(AuthDbContext context)
         {
             _context = context;
         }
-        
-        /// <summary>
-        /// 註冊新用戶
-        /// </summary>
-        /// <param name="request">註冊請求</param>
-        /// <returns>註冊成功的用戶</returns>
-        public async Task<User> Register(RegisterRequest request)
-        {
-            // 檢查用戶名是否已存在
-            if (await _context.Users.AnyAsync(u => u.Username == request.Username))
-            {
-                throw new ApplicationException("用戶名已被使用");
-            }
-            
-            // 檢查電子郵件是否已存在
-            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-            {
-                throw new ApplicationException("電子郵件已被使用");
-    }
-            
-            // 生成密碼鹽值
-            var salt = GenerateSalt();
-            
-            // 創建新用戶
-            var user = new User
-            {
-                Username = request.Username,
-                Email = request.Email,
-                FullName = request.FullName,
-                PasswordHash = HashPassword(request.Password, salt),
-                Salt = salt,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            
-            // 將用戶添加到數據庫
-            await _context.Users.AddAsync(user);
-            
-            // 獲取默認用戶角色
-            var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
-            if (defaultRole == null)
-            {
-                // 如果默認角色不存在，則創建
-                defaultRole = new Role
-                {
-                    Name = "User",
-                    Description = "普通用戶",
-                    IsSystem = true,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-                await _context.Roles.AddAsync(defaultRole);
-                await _context.SaveChangesAsync();
-}
-            
-            // 為用戶分配默認角色
-            var userRole = new UserRole
-            {
-                UserId = user.Id,
-                RoleId = defaultRole.Id,
-                CreatedAt = DateTime.UtcNow
-            };
-            await _context.UserRoles.AddAsync(userRole);
-            
-            // 保存更改
-            await _context.SaveChangesAsync();
-            
-            return user;
-        }
-        
-        /// <summary>
-        /// 根據用戶名查詢用戶
-        /// </summary>
-        /// <param name="username">用戶名</param>
-        /// <returns>用戶對象，如果不存在則返回null</returns>
-        public async Task<User> GetByUsername(string username)
-        {
-            return await _context.Users
-                .Include(u => u.RefreshTokens)
-                .FirstOrDefaultAsync(u => u.Username == username);
-        }
-        
-        /// <summary>
-        /// 根據ID查詢用戶
-        /// </summary>
-        /// <param name="id">用戶ID</param>
-        /// <returns>用戶對象，如果不存在則返回null</returns>
-        public async Task<User> GetById(string id)
+
+        /// <inheritdoc />
+        public async Task<User?> GetById(string id)
         {
             return await _context.Users
                 .Include(u => u.RefreshTokens)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
-        
-        /// <summary>
-        /// 根據電子郵件查詢用戶
-        /// </summary>
-        /// <param name="email">電子郵件</param>
-        /// <returns>用戶對象，如果不存在則返回null</returns>
-        public async Task<User> GetByEmail(string email)
+
+        /// <inheritdoc />
+        public async Task<User?> GetByUsername(string username)
+        {
+            return await _context.Users
+                .Include(u => u.RefreshTokens)
+                .FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+        /// <inheritdoc />
+        public async Task<User?> GetByEmail(string email)
         {
             return await _context.Users
                 .Include(u => u.RefreshTokens)
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
-        
-        /// <summary>
-        /// 根據刷新令牌查詢用戶
-        /// </summary>
-        /// <param name="refreshToken">刷新令牌</param>
-        /// <returns>用戶對象，如果不存在則返回null</returns>
-        public async Task<User> GetUserByRefreshToken(string refreshToken)
+
+        /// <inheritdoc />
+        public async Task<User?> GetUserByRefreshToken(string refreshToken)
         {
             return await _context.Users
                 .Include(u => u.RefreshTokens)
-                .FirstOrDefaultAsync(u => u.RefreshTokens.Any(rt => rt.Token == refreshToken));
+                .FirstOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == refreshToken && t.ExpiresAt > DateTime.UtcNow));
         }
-        
-        /// <summary>
-        /// 驗證用戶密碼
-        /// </summary>
-        /// <param name="user">用戶對象</param>
-        /// <param name="password">待驗證的密碼</param>
-        /// <returns>密碼是否正確</returns>
-        public async Task<bool> ValidatePassword(User user, string password)
+
+        /// <inheritdoc />
+        public async Task<User> Register(RegisterRequest request)
         {
-            // 使用相同的鹽值對輸入的密碼進行哈希
-            var hashedPassword = HashPassword(password, user.Salt);
-            
-            // 比較哈希值是否匹配
-            return hashedPassword == user.PasswordHash;
-        }
-        
-        /// <summary>
-        /// 獲取用戶的角色列表
-        /// </summary>
-        /// <param name="userId">用戶ID</param>
-        /// <returns>角色名稱列表</returns>
-        public async Task<List<string>> GetUserRoles(string userId)
-        {
-            // 查詢用戶的所有角色
-            var roles = await _context.UserRoles
-                .Where(ur => ur.UserId == userId)
-                .Join(_context.Roles,
-                    ur => ur.RoleId,
-                    r => r.Id,
-                    (ur, r) => r.Name)
-                .ToListAsync();
-            
-            return roles;
-        }
-        
-        /// <summary>
-        /// 更新用戶信息
-        /// </summary>
-        /// <param name="user">用戶對象</param>
-        /// <returns>更新後的用戶對象</returns>
-        public async Task<User> UpdateUserAsync(User user)
-        {
-            // 更新用戶更新時間
-            user.UpdatedAt = DateTime.UtcNow;
-            
-            // 更新用戶信息
-            _context.Users.Update(user);
+            // 檢查用戶名是否已存在
+            if (await _context.Users.AnyAsync(u => u.Username == request.Username))
+            {
+                throw new ApplicationException($"用戶名 '{request.Username}' 已被使用");
+            }
+
+            // 檢查電子郵件是否已存在
+            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
+            {
+                throw new ApplicationException($"電子郵件 '{request.Email}' 已被使用");
+            }
+
+            // 生成鹽值
+            var salt = GenerateSalt();
+            // 創建密碼哈希
+            var passwordHash = HashPassword(request.Password, salt);
+
+            // 創建新用戶
+            var user = new User
+            {
+                Id = Guid.NewGuid().ToString(),
+                Username = request.Username,
+                Email = request.Email,
+                FullName = request.FullName,
+                PasswordHash = passwordHash,
+                Salt = salt,
+                LastLoginIp = "127.0.0.1", // 添加必填屬性的預設值
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                RefreshTokens = new List<RefreshToken>()
+            };
+
+            await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
-            
+
+            // 分配預設角色
+            var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User" && r.IsSystem);
+            if (defaultRole != null)
+            {
+                // 修改 UserRole 的初始化代碼
+                var userRole = new UserRole
+                {
+                    UserId = user.Id,
+                    RoleId = defaultRole.Id,
+                    CreatedAt = DateTime.UtcNow,
+                    // 添加必要的導航屬性
+                    User = user,
+                    Role = defaultRole
+                };
+
+                await _context.UserRoles.AddAsync(userRole);
+            await _context.SaveChangesAsync();
+        }
+
             return user;
         }
-        
+        /// <inheritdoc />
+        public async Task<bool> ValidatePassword(User user, string password)
+        {
+            var hash = HashPassword(password, user.Salt);
+            // 添加 await 以避免警告
+            await Task.CompletedTask;
+            return hash == user.PasswordHash;
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<string>> GetUserRoles(string userId)
+        {
+            var roleIds = await _context.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .Select(ur => ur.RoleId)
+                .ToListAsync();
+
+            if (!roleIds.Any())
+        {
+                return Enumerable.Empty<string>();
+            }
+
+            var roleNames = await _context.Roles
+                .Where(r => roleIds.Contains(r.Id))
+                .Select(r => r.Name)
+                .ToListAsync();
+
+            return roleNames;
+        }
+
+        /// <inheritdoc />
+        public async Task<User> UpdateUserAsync(User user)
+            {
+            user.UpdatedAt = DateTime.UtcNow;
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            return user;
+            }
+
         /// <summary>
         /// 生成隨機鹽值
         /// </summary>
-        /// <returns>鹽值字符串</returns>
+        /// <returns>Base64編碼的鹽值</returns>
         private string GenerateSalt()
         {
-            var randomBytes = new byte[32];
+            var saltBytes = new byte[16];
             using (var rng = RandomNumberGenerator.Create())
             {
-                rng.GetBytes(randomBytes);
-            }
-            return Convert.ToBase64String(randomBytes);
-        }
-        
+                rng.GetBytes(saltBytes);
+    }
+            return Convert.ToBase64String(saltBytes);
+}
+
         /// <summary>
-        /// 使用鹽值對密碼進行哈希
+        /// 使用鹽值哈希密碼
         /// </summary>
-        /// <param name="password">原始密碼</param>
+        /// <param name="password">密碼</param>
         /// <param name="salt">鹽值</param>
-        /// <returns>哈希後的密碼</returns>
+        /// <returns>Base64編碼的哈希值</returns>
         private string HashPassword(string password, string salt)
         {
-            // 將密碼和鹽值組合
-            var combinedBytes = Encoding.UTF8.GetBytes(password + salt);
-            
-            // 使用SHA256算法計算哈希值
             using (var sha256 = SHA256.Create())
             {
-                var hashBytes = sha256.ComputeHash(combinedBytes);
+                var passwordBytes = Encoding.UTF8.GetBytes(password + salt);
+                var hashBytes = sha256.ComputeHash(passwordBytes);
                 return Convert.ToBase64String(hashBytes);
             }
         }

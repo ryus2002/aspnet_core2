@@ -17,13 +17,13 @@ namespace AuthService.Models
         /// <summary>
         /// 所屬用戶ID
         /// </summary>
-        public string UserId { get; set; }
+        public required string UserId { get; set; }
         
         /// <summary>
         /// 刷新令牌值
         /// </summary>
         [Required]
-        public string Token { get; set; }
+        public required string Token { get; set; }
         
         /// <summary>
         /// 令牌過期時間
@@ -38,7 +38,7 @@ namespace AuthService.Models
         /// <summary>
         /// 令牌創建IP地址
         /// </summary>
-        public string CreatedByIp { get; set; }
+        public required string CreatedByIp { get; set; }
         
         /// <summary>
         /// 令牌是否已被撤銷
@@ -53,12 +53,12 @@ namespace AuthService.Models
         /// <summary>
         /// 令牌撤銷IP地址
         /// </summary>
-        public string RevokedByIp { get; set; }
+        public string RevokedByIp { get; set; } = string.Empty;
         
         /// <summary>
         /// 替換此令牌的新令牌
         /// </summary>
-        public string ReplacedByToken { get; set; }
+        public string ReplacedByToken { get; set; } = string.Empty;
         
         /// <summary>
         /// 令牌是否處於活躍狀態
@@ -68,6 +68,6 @@ namespace AuthService.Models
         /// <summary>
         /// 用戶導航屬性
         /// </summary>
-        public virtual User User { get; set; }
+        public virtual User User { get; set; } = null!;
     }
 }

@@ -48,7 +48,7 @@ namespace AuthService.Controllers
             {
                 _logger.LogInformation("獲取所有角色");
                 
-                var roles = await _roleService.GetAllRoles();
+                var roles = await _roleService.GetAllRolesAsync();
                 return Ok(roles);
             }
             catch (Exception ex)
@@ -75,7 +75,7 @@ namespace AuthService.Controllers
             {
                 _logger.LogInformation("獲取角色: {RoleId}", id);
                 
-                var role = await _roleService.GetRoleById(id);
+                var role = await _roleService.GetRoleByIdAsync(id);
                 if (role == null)
                 {
                     return NotFound($"角色ID '{id}' 不存在");
@@ -107,7 +107,7 @@ namespace AuthService.Controllers
             {
                 _logger.LogInformation("創建角色: {RoleName}", role.Name);
                 
-                var createdRole = await _roleService.CreateRole(role);
+                var createdRole = await _roleService.CreateRoleAsync(role.Name, role.Description);
                 return CreatedAtAction(nameof(GetRoleById), new { id = createdRole.Id }, createdRole);
             }
             catch (ApplicationException ex)
@@ -147,7 +147,7 @@ namespace AuthService.Controllers
                     return BadRequest("請求路徑中的ID與角色對象中的ID不匹配");
                 }
                 
-                var updatedRole = await _roleService.UpdateRole(role);
+                var updatedRole = await _roleService.UpdateRoleAsync(id, role.Name, role.Description);
                 return Ok(updatedRole);
             }
             catch (ApplicationException ex)
@@ -179,7 +179,7 @@ namespace AuthService.Controllers
             {
                 _logger.LogInformation("刪除角色: {RoleId}", id);
                 
-                var result = await _roleService.DeleteRole(id);
+                var result = await _roleService.DeleteRoleAsync(id);
                 if (!result)
                 {
                     return NotFound($"角色ID '{id}' 不存在");
@@ -212,7 +212,7 @@ namespace AuthService.Controllers
             {
                 _logger.LogInformation("為用戶分配角色: {UserId}, {RoleId}", userId, roleId);
                 
-                var result = await _roleService.AssignRoleToUser(userId, roleId);
+                var result = await _roleService.AssignRoleToUserAsync(userId, roleId);
                 if (!result)
                 {
                     return NotFound("用戶或角色不存在");
@@ -245,7 +245,7 @@ namespace AuthService.Controllers
             {
                 _logger.LogInformation("從用戶移除角色: {UserId}, {RoleId}", userId, roleId);
                 
-                var result = await _roleService.RemoveRoleFromUser(userId, roleId);
+                var result = await _roleService.RemoveRoleFromUserAsync(userId, roleId);
                 if (!result)
                 {
                     return NotFound("用戶角色關聯不存在");
@@ -277,7 +277,7 @@ namespace AuthService.Controllers
             {
                 _logger.LogInformation("獲取角色權限: {RoleId}", roleId);
                 
-                var role = await _roleService.GetRoleById(roleId);
+                var role = await _roleService.GetRoleByIdAsync(roleId);
                 if (role == null)
                 {
                     return NotFound($"角色ID '{roleId}' 不存在");

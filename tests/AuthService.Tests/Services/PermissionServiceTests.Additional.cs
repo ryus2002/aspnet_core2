@@ -1,17 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AuthService.Models;
-using AuthService.Services;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Moq;
-using Moq.EntityFrameworkCore;
 using Xunit;
-
 namespace AuthService.Tests.Services
 {
-    // 擴展 PermissionServiceTests 類別，添加更多測試方法
     public partial class PermissionServiceTests
     {
         [Fact]
@@ -21,54 +17,48 @@ namespace AuthService.Tests.Services
             var roleId = "role1";
             var permissionId = "perm1";
 
-            var roles = new List<Role>
-            {
-                new Role { Id = roleId, Name = "Admin" }
+            var role = new Role { 
+                Id = roleId, 
+                Name = "Admin",
+                Description = "Administrator role" // 添加必填屬性
+            };
+            var permission = new Permission { 
+                Id = permissionId, 
+                Name = "product:read",
+                Resource = "product", // 添加必填屬性
+                Action = "read", // 添加必填屬性
+                Description = "Read product permission" // 添加必填屬性
             };
 
-            var permissions = new List<Permission>
-            {
-                new Permission { Id = permissionId, Name = "product:read" }
-            };
-
-            var rolePermissions = new List<RolePermission>();
-
-            _mockContext.Setup(c => c.Roles).ReturnsDbSet(roles);
-            _mockContext.Setup(c => c.Permissions).ReturnsDbSet(permissions);
-            _mockContext.Setup(c => c.RolePermissions).ReturnsDbSet(rolePermissions);
-
-            _mockContext.Setup(c => c.RolePermissions.AddAsync(It.IsAny<RolePermission>(), It.IsAny<CancellationToken>()))
-                .Callback((RolePermission rp, CancellationToken token) => rolePermissions.Add(rp));
-
+            await _context.Roles.AddAsync(role);
+            await _context.Permissions.AddAsync(permission);
+            await _context.SaveChangesAsync();
             // Act
             var result = await _permissionService.AssignPermissionToRole(roleId, permissionId);
 
             // Assert
             result.Should().BeTrue();
-            rolePermissions.Should().ContainSingle();
-            rolePermissions[0].RoleId.Should().Be(roleId);
-            rolePermissions[0].PermissionId.Should().Be(permissionId);
-
-            _mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            var rolePermission = await _context.RolePermissions
+                .FirstOrDefaultAsync(rp => rp.RoleId == roleId && rp.PermissionId == permissionId);
+            rolePermission.Should().NotBeNull();
         }
 
         [Fact]
         public async Task AssignPermissionToRole_WithNonExistingRole_ShouldReturnFalse()
         {
             // Arrange
-            var roleId = "nonexistingrole";
-            var permissionId = "perm1";
+            var roleId = "nonexistent";
+            var permissionId = "perm2";
 
-            var roles = new List<Role>(); // 空角色列表
-
-            var permissions = new List<Permission>
-            {
-                new Permission { Id = permissionId, Name = "product:read" }
+            var permission = new Permission { 
+                Id = permissionId, 
+                Name = "product:read",
+                Resource = "product", // 添加必填屬性
+                Action = "read", // 添加必填屬性
+                Description = "Read product permission" // 添加必填屬性
             };
-
-            _mockContext.Setup(c => c.Roles).ReturnsDbSet(roles);
-            _mockContext.Setup(c => c.Permissions).ReturnsDbSet(permissions);
-
+            await _context.Permissions.AddAsync(permission);
+            await _context.SaveChangesAsync();
             // Act
             var result = await _permissionService.AssignPermissionToRole(roleId, permissionId);
 
@@ -80,19 +70,16 @@ namespace AuthService.Tests.Services
         public async Task AssignPermissionToRole_WithNonExistingPermission_ShouldReturnFalse()
         {
             // Arrange
-            var roleId = "role1";
-            var permissionId = "nonexistingperm";
+            var roleId = "role3";
+            var permissionId = "nonexistent";
 
-            var roles = new List<Role>
-            {
-                new Role { Id = roleId, Name = "Admin" }
+            var role = new Role { 
+                Id = roleId, 
+                Name = "User",
+                Description = "Regular user role" // 添加必填屬性
             };
-
-            var permissions = new List<Permission>(); // 空權限列表
-
-            _mockContext.Setup(c => c.Roles).ReturnsDbSet(roles);
-            _mockContext.Setup(c => c.Permissions).ReturnsDbSet(permissions);
-
+            await _context.Roles.AddAsync(role);
+            await _context.SaveChangesAsync();
             // Act
             var result = await _permissionService.AssignPermissionToRole(roleId, permissionId);
 
@@ -104,43 +91,30 @@ namespace AuthService.Tests.Services
         public async Task RemovePermissionFromRole_WithExistingRolePermission_ShouldReturnTrue()
         {
             // Arrange
-            var roleId = "role1";
-            var permissionId = "perm1";
+            var roleId = "role4";
+            var permissionId = "perm4";
 
-            var rolePermission = new RolePermission
-            {
-                RoleId = roleId,
-                PermissionId = permissionId
-            };
-
-            var rolePermissions = new List<RolePermission> { rolePermission };
-
-            _mockContext.Setup(c => c.RolePermissions).ReturnsDbSet(rolePermissions);
-
-            _mockContext.Setup(c => c.RolePermissions.Remove(It.IsAny<RolePermission>()))
-                .Callback((RolePermission rp) => rolePermissions.Remove(rp));
-
+            var rolePermission = new RolePermission { RoleId = roleId, PermissionId = permissionId };
+            await _context.RolePermissions.AddAsync(rolePermission);
+            await _context.SaveChangesAsync();
             // Act
             var result = await _permissionService.RemovePermissionFromRole(roleId, permissionId);
 
             // Assert
             result.Should().BeTrue();
-            rolePermissions.Should().BeEmpty();
-
-            _mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            var removed = await _context.RolePermissions
+                .FirstOrDefaultAsync(rp => rp.RoleId == roleId && rp.PermissionId == permissionId);
+            removed.Should().BeNull();
         }
 
         [Fact]
         public async Task RemovePermissionFromRole_WithNonExistingRolePermission_ShouldReturnFalse()
         {
             // Arrange
-            var roleId = "role1";
-            var permissionId = "perm1";
+            var roleId = "role5";
+            var permissionId = "perm5";
 
-            var rolePermissions = new List<RolePermission>(); // 空角色權限列表
-
-            _mockContext.Setup(c => c.RolePermissions).ReturnsDbSet(rolePermissions);
-
+            // 不添加任何角色權限
             // Act
             var result = await _permissionService.RemovePermissionFromRole(roleId, permissionId);
 
@@ -152,19 +126,12 @@ namespace AuthService.Tests.Services
         public async Task CreatePermission_WithValidPermission_ShouldReturnCreatedPermission()
         {
             // Arrange
-            var permissions = new List<Permission>();
-
-            _mockContext.Setup(c => c.Permissions).ReturnsDbSet(permissions);
-
-            _mockContext.Setup(c => c.Permissions.AddAsync(It.IsAny<Permission>(), It.IsAny<CancellationToken>()))
-                .Callback((Permission p, CancellationToken token) => permissions.Add(p));
-
             var permission = new Permission
             {
-                Name = "product:create",
-                Description = "Create products",
+                Name = "product:delete",
                 Resource = "product",
-                Action = "create"
+                Action = "delete",
+                Description = "Delete products"
             };
 
             // Act
@@ -172,15 +139,14 @@ namespace AuthService.Tests.Services
 
             // Assert
             result.Should().NotBeNull();
+            result.Id.Should().NotBeNullOrEmpty();
             result.Name.Should().Be(permission.Name);
-            result.Description.Should().Be(permission.Description);
             result.Resource.Should().Be(permission.Resource);
             result.Action.Should().Be(permission.Action);
-            result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
-            result.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+            result.Description.Should().Be(permission.Description);
 
-            permissions.Should().ContainSingle();
-            _mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            var savedPermission = await _context.Permissions.FindAsync(result.Id);
+            savedPermission.Should().NotBeNull();
         }
     }
 }

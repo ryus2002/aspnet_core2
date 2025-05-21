@@ -22,10 +22,18 @@
     </PackageReference>
     <PackageReference Include="Moq" Version="4.20.70" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <!-- 添加缺少的套件 -->
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.4.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
+    <PackageReference Include="Moq.EntityFrameworkCore" Version="7.0.0.2" />
   </ItemGroup>
 
+  <!-- 修正專案參考路徑，使用正確的專案檔名 -->
   <ItemGroup>
-    <ProjectReference Include="..\..\services\auth-service\AuthService.csproj" />
+    <ProjectReference Include="..\..\services\auth-service\auth-service.csproj" />
   </ItemGroup>
 
 </Project>

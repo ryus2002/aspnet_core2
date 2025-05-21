@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AuthService.Attributes;
 using AuthService.Services;
 using AuthService.Settings;
 using Microsoft.AspNetCore.Http;
@@ -142,7 +143,7 @@ namespace AuthService.Middleware
         /// </summary>
         /// <param name="token">JWT令牌</param>
         /// <returns>聲明主體，如果令牌無效則返回null</returns>
-        private ClaimsPrincipal ValidateToken(string token)
+        private ClaimsPrincipal? ValidateToken(string token)  // 添加 ? 表示可能返回 null
         {
             try
             {

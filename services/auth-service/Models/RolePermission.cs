@@ -10,12 +10,12 @@ namespace AuthService.Models
         /// <summary>
         /// 角色ID
         /// </summary>
-        public string RoleId { get; set; }
+        public required string RoleId { get; set; }
         
         /// <summary>
         /// 權限ID
         /// </summary>
-        public string PermissionId { get; set; }
+        public required string PermissionId { get; set; }
         
         /// <summary>
         /// 關聯創建時間
@@ -25,11 +25,11 @@ namespace AuthService.Models
         /// <summary>
         /// 角色導航屬性
         /// </summary>
-        public virtual Role Role { get; set; }
+        public virtual Role Role { get; set; } = null!;
         
         /// <summary>
         /// 權限導航屬性
         /// </summary>
-        public virtual Permission Permission { get; set; }
+        public virtual Permission Permission { get; set; } = null!;
     }
 }

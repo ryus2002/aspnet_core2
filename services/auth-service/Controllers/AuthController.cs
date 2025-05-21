@@ -4,6 +4,8 @@ using AuthService.DTOs;
 using AuthService.Services;
 using System.Threading.Tasks;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Collections.Generic;
+using System;
 
 namespace AuthService.Controllers
 {
@@ -21,17 +23,6 @@ namespace AuthService.Controllers
             _jwtService = jwtService;
         }
 
-        /// <summary>
-        /// 用戶登入
-        /// </summary>
-        /// <remarks>
-        /// 使用用戶名/電子郵件和密碼進行登入，成功後返回訪問令牌和刷新令牌
-        /// </remarks>
-        /// <param name="request">登入請求參數</param>
-        /// <returns>包含訪問令牌、刷新令牌和用戶資料的響應</returns>
-        /// <response code="200">登入成功</response>
-        /// <response code="400">請求參數無效</response>
-        /// <response code="401">認證失敗</response>
         [HttpPost("login")]
         [SwaggerOperation(
             Summary = "用戶登入",
@@ -45,18 +36,25 @@ namespace AuthService.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             // 實現登入邏輯
-            return Ok(new AuthResponse());
-        }
+            // 這裡只是示例，實際應該調用服務層進行用戶驗證
+            // 添加await以避免警告
+            await Task.CompletedTask;
+            
+            var authResponse = new AuthResponse
+            {
+                Id = "user-id",
+                Username = "username",
+                Email = "user@example.com",
+                FullName = "User Full Name",
+                Roles = new List<string> { "User" },
+                AccessToken = "access-token",
+                RefreshToken = "refresh-token",
+                AccessTokenExpires = DateTime.UtcNow.AddHours(1),
+                EmailVerified = true
+            };
 
-        /// <summary>
-        /// 用戶登出
-        /// </summary>
-        /// <remarks>
-        /// 使當前令牌失效
-        /// </remarks>
-        /// <returns>登出成功的消息</returns>
-        /// <response code="200">登出成功</response>
-        /// <response code="401">未認證</response>
+            return Ok(authResponse);
+        }
         [Authorize]
         [HttpPost("logout")]
         [SwaggerOperation(
@@ -70,20 +68,12 @@ namespace AuthService.Controllers
         public async Task<IActionResult> Logout()
         {
             // 實現登出邏輯
+            // 添加await以避免警告
+            await Task.CompletedTask;
+            
             return Ok(new { message = "登出成功" });
         }
 
-        /// <summary>
-        /// 刷新令牌
-        /// </summary>
-        /// <remarks>
-        /// 使用刷新令牌獲取新的訪問令牌
-        /// </remarks>
-        /// <param name="request">刷新令牌請求參數</param>
-        /// <returns>包含新訪問令牌和刷新令牌的響應</returns>
-        /// <response code="200">令牌刷新成功</response>
-        /// <response code="400">請求參數無效</response>
-        /// <response code="401">刷新令牌無效或已過期</response>
         [HttpPost("refresh-token")]
         [SwaggerOperation(
             Summary = "刷新令牌",
@@ -97,20 +87,23 @@ namespace AuthService.Controllers
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
             // 實現刷新令牌邏輯
-            return Ok(new AuthResponse());
-        }
+            var authResponse = new AuthResponse
+            {
+                Id = "user-id",
+                Username = "username",
+                Email = "user@example.com",
+                FullName = "User Full Name",
+                Roles = new List<string> { "User" },
+                AccessToken = "new-access-token",
+                RefreshToken = "new-refresh-token",
+                AccessTokenExpires = DateTime.UtcNow.AddHours(1),
+                EmailVerified = true
+            };
 
-        /// <summary>
-        /// 用戶註冊
-        /// </summary>
-        /// <remarks>
-        /// 註冊新用戶
-        /// </remarks>
-        /// <param name="request">註冊請求參數</param>
-        /// <returns>註冊成功的用戶資料</returns>
-        /// <response code="201">用戶創建成功</response>
-        /// <response code="400">請求參數無效</response>
-        /// <response code="409">用戶名或電子郵件已存在</response>
+            await Task.CompletedTask; // 添加await以避免警告
+            
+            return Ok(authResponse);
+        }
         [HttpPost("register")]
         [SwaggerOperation(
             Summary = "用戶註冊",
@@ -124,7 +117,13 @@ namespace AuthService.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             // 實現註冊邏輯
-            return StatusCode(201, new { /* 用戶資料 */ });
+            await Task.CompletedTask; // 添加await以避免警告
+            return StatusCode(201, new { 
+                Id = "new-user-id",
+                Username = request.Username,
+                Email = request.Email,
+                FullName = request.FullName
+            });
         }
     }
 }

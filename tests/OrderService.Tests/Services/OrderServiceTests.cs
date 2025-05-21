@@ -10,7 +10,11 @@ using OrderService.Data;
 using OrderService.DTOs;
 using OrderService.Models;
 using OrderService.Services;
+using OrderService.Messaging.Publishers;
 using Xunit;
+using System.Linq.Expressions;
+using System.Threading;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace OrderService.Tests.Services
 {
@@ -19,6 +23,7 @@ namespace OrderService.Tests.Services
         private readonly Mock<OrderDbContext> _mockDbContext;
         private readonly Mock<ICartService> _mockCartService;
         private readonly Mock<ILogger<OrderService.Services.OrderService>> _mockLogger;
+        private readonly Mock<OrderEventPublisher> _mockOrderEventPublisher;
         private readonly IOrderService _orderService;
 
         public OrderServiceTests()
@@ -31,6 +36,10 @@ namespace OrderService.Tests.Services
             _mockDbContext = new Mock<OrderDbContext>(options);
             _mockCartService = new Mock<ICartService>();
             _mockLogger = new Mock<ILogger<OrderService.Services.OrderService>>();
+            _mockOrderEventPublisher = new Mock<OrderEventPublisher>(
+                Mock.Of<Shared.Messaging.IMessageBus>(),
+                Mock.Of<ILogger<OrderEventPublisher>>()
+            );
 
             // 設置模擬的數據庫事務
             var mockTransaction = new Mock<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction>();
@@ -40,7 +49,8 @@ namespace OrderService.Tests.Services
             _orderService = new OrderService.Services.OrderService(
                 _mockDbContext.Object,
                 _mockCartService.Object,
-                _mockLogger.Object
+                _mockLogger.Object,
+                _mockOrderEventPublisher.Object
             );
         }
 
@@ -53,7 +63,7 @@ namespace OrderService.Tests.Services
             var shippingAddressId = 1;
             var billingAddressId = 2;
 
-            // 模擬購物車
+            // 模擬購物車項目
             var cartItems = new List<CartItemResponse>
             {
                 new CartItemResponse
@@ -72,28 +82,42 @@ namespace OrderService.Tests.Services
                 }
             };
 
+            // 創建一個有效的購物車響應
             var cart = new CartResponse
             {
                 Id = cartId,
                 UserId = userId,
+                SessionId = "session1",
+                Status = "active",
                 Items = cartItems,
-                TotalAmount = 250.00m,
-                ItemsCount = 3
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             // 模擬購物車服務
             _mockCartService.Setup(s => s.GetCartByIdAsync(cartId))
-                .ReturnsAsync(cart);
+                .Returns(Task.FromResult<CartResponse?>(cart));
             
+            // 創建一個更新狀態後的購物車響應
+            var updatedCart = new CartResponse
+            {
+                Id = cartId,
+                UserId = userId,
+                SessionId = "session1",
+                Status = "converted",
+                Items = cartItems,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
             _mockCartService.Setup(s => s.UpdateCartStatusAsync(cartId, "converted"))
-                .ReturnsAsync(true);
+                .Returns(Task.FromResult(updatedCart));
 
             // 模擬數據庫操作
             var orders = new List<Order>();
             var orderItems = new List<OrderItem>();
             var statusHistories = new List<OrderStatusHistory>();
             var orderEvents = new List<OrderEvent>();
-
             // 模擬訂單表
             var mockOrderSet = new Mock<DbSet<Order>>();
             mockOrderSet.Setup(m => m.Add(It.IsAny<Order>()))
@@ -122,7 +146,6 @@ namespace OrderService.Tests.Services
             _mockDbContext.Setup(db => db.Orders.Where(It.IsAny<Func<Order, bool>>()))
                 .Returns<Func<Order, bool>>(predicate => 
                     new TestAsyncEnumerable<Order>(orders.Where(predicate)));
-
             // 創建訂單請求
             var request = new CreateOrderRequest
             {
@@ -171,6 +194,9 @@ namespace OrderService.Tests.Services
             
             // 驗證購物車狀態是否被更新
             _mockCartService.Verify(s => s.UpdateCartStatusAsync(cartId, "converted"), Times.Once);
+            
+            // 驗證訂單創建事件是否被發布
+            _mockOrderEventPublisher.Verify(p => p.PublishOrderCreatedEventAsync(It.IsAny<Order>()), Times.Once);
         }
 
         [Fact]
@@ -185,14 +211,16 @@ namespace OrderService.Tests.Services
             {
                 Id = cartId,
                 UserId = userId,
+                SessionId = "session1",
+                Status = "active",
                 Items = new List<CartItemResponse>(),
-                TotalAmount = 0.00m,
-                ItemsCount = 0
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             // 模擬購物車服務
             _mockCartService.Setup(s => s.GetCartByIdAsync(cartId))
-                .ReturnsAsync(cart);
+                .Returns(Task.FromResult<CartResponse?>(cart));
 
             // 創建訂單請求
             var request = new CreateOrderRequest
@@ -217,7 +245,7 @@ namespace OrderService.Tests.Services
 
             // 模擬購物車服務
             _mockCartService.Setup(s => s.GetCartByIdAsync(cartId))
-                .ReturnsAsync((CartResponse)null);
+                .Returns(Task.FromResult<CartResponse?>(null));
 
             // 創建訂單請求
             var request = new CreateOrderRequest
@@ -311,29 +339,12 @@ namespace OrderService.Tests.Services
             return _inner.Execute<TResult>(expression);
         }
 
-        public IAsyncEnumerable<TResult> ExecuteAsync<TResult>(Expression expression)
+        // 正確實現 IAsyncQueryProvider 接口的 ExecuteAsync 方法
+        public TResult ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
         {
-            return new TestAsyncEnumerable<TResult>(expression);
-        }
-
-        public TResult ExecuteScalar<TResult>(Expression expression)
-        {
-            return Execute<TResult>(expression);
-        }
-
-        public Task<TResult> ExecuteScalarAsync<TResult>(Expression expression, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(ExecuteScalar<TResult>(expression));
-        }
-
-        public Task<object> ExecuteAsync(Expression expression, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(Execute(expression));
-        }
-
-        public Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(Execute<TResult>(expression));
+            // 直接調用同步版本的 Execute 方法
+            // 注意：這裡的實現不是真正的異步，但對於測試目的來說是足夠的
+            return Execute<TResult>(expression)!;
         }
     }
 }

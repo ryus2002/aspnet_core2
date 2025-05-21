@@ -19,27 +19,27 @@ namespace AuthService.Models
         /// </summary>
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         
         /// <summary>
         /// 權限描述
         /// </summary>
         [StringLength(255)]
-        public string Description { get; set; }
+        public required string Description { get; set; }
         
         /// <summary>
         /// 資源名稱，如 "User", "Product" 等
         /// </summary>
         [Required]
         [StringLength(100)]
-        public string Resource { get; set; }
+        public required string Resource { get; set; }
         
         /// <summary>
         /// 操作類型，如 "Create", "Read", "Update", "Delete" 等
         /// </summary>
         [Required]
         [StringLength(50)]
-        public string Action { get; set; }
+        public required string Action { get; set; }
         
         /// <summary>
         /// 權限創建時間

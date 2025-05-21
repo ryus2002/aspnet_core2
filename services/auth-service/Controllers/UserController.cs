@@ -53,10 +53,13 @@ namespace AuthService.Controllers
             {
                 _logger.LogInformation("獲取所有用戶");
                 
+                // 添加 await 以避免警告
+                await Task.CompletedTask;
+                
                 // 這裡實現獲取所有用戶的邏輯
                 // 暫時返回空列表
                 return Ok(new List<UserDto>());
-            }
+                }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "獲取所有用戶時發生錯誤");
@@ -132,7 +135,7 @@ namespace AuthService.Controllers
                 if (user == null)
                 {
                     return NotFound($"用戶ID '{id}' 不存在");
-                }
+            }
                 
                 // 更新用戶信息
                 user.FullName = updateRequest.FullName ?? user.FullName;
@@ -143,7 +146,7 @@ namespace AuthService.Controllers
                 
                 // 將更新後的用戶對象轉換為DTO
                 var userDto = new UserDto
-                {
+            {
                     Id = updatedUser.Id,
                     Username = updatedUser.Username,
                     Email = updatedUser.Email,
@@ -156,9 +159,9 @@ namespace AuthService.Controllers
                 };
                 
                 return Ok(userDto);
-            }
+        }
             catch (Exception ex)
-            {
+    {
                 _logger.LogError(ex, "更新用戶時發生錯誤: {UserId}", id);
                 return StatusCode(StatusCodes.Status500InternalServerError, "更新用戶時發生錯誤");
             }
@@ -181,6 +184,9 @@ namespace AuthService.Controllers
             {
                 _logger.LogInformation("刪除用戶: {UserId}", id);
                 
+                // 添加 await 以避免警告
+                await Task.CompletedTask;
+                
                 // 這裡實現刪除用戶的邏輯
                 // 暫時只返回成功
                 return NoContent();
@@ -201,22 +207,22 @@ namespace AuthService.Controllers
         /// <summary>
         /// 用戶ID
         /// </summary>
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
         
         /// <summary>
         /// 用戶名
         /// </summary>
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
         
         /// <summary>
         /// 電子郵件
         /// </summary>
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
         
         /// <summary>
         /// 全名
         /// </summary>
-        public string FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
         
         /// <summary>
         /// 是否啟用
@@ -258,5 +264,5 @@ namespace AuthService.Controllers
         /// 是否啟用
         /// </summary>
         public bool? IsActive { get; set; }
-    }
+}
 }

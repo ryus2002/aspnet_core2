@@ -147,7 +147,7 @@ namespace AuthService.Controllers
                     return BadRequest("請求路徑中的ID與權限對象中的ID不匹配");
                 }
                 
-                var updatedPermission = await _permissionService.UpdatePermission(permission);
+                var updatedPermission = await _permissionService.UpdatePermission(id, permission);
                 return Ok(updatedPermission);
             }
             catch (ApplicationException ex)

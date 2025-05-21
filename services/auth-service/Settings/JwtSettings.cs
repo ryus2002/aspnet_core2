@@ -8,17 +8,17 @@ namespace AuthService.Settings
         /// <summary>
         /// JWT密鑰，用於簽名令牌
         /// </summary>
-        public string Secret { get; set; }
+        public required string Secret { get; set; }
         
         /// <summary>
         /// 令牌發行者
         /// </summary>
-        public string Issuer { get; set; }
+        public required string Issuer { get; set; }
         
         /// <summary>
         /// 令牌接收者
         /// </summary>
-        public string Audience { get; set; }
+        public required string Audience { get; set; }
         
         /// <summary>
         /// 訪問令牌過期時間（分鐘）
