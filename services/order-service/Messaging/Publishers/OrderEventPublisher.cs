@@ -31,7 +31,7 @@ namespace OrderService.Messaging.Publishers
         /// </summary>
         /// <param name="order">訂單對象</param>
         /// <returns>異步任務</returns>
-        public async Task PublishOrderCreatedEventAsync(Order order)
+        public virtual async Task PublishOrderCreatedEventAsync(Order order)
         {
             try
             {
@@ -70,7 +70,7 @@ namespace OrderService.Messaging.Publishers
         /// <param name="newStatus">新狀態</param>
         /// <param name="reason">更新原因</param>
         /// <returns>異步任務</returns>
-        public async Task PublishOrderStatusChangedEventAsync(Order order, string oldStatus, string newStatus, string? reason = null)
+        public virtual async Task PublishOrderStatusChangedEventAsync(Order order, string oldStatus, string newStatus, string? reason = null)
         {
             try
             {
