@@ -1,113 +1,49 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using OrderService.Data;
 using OrderService.Services;
+using OrderService.Messaging.Publishers;
+using Shared.Messaging.Extensions;
 using System.Reflection;
-using System.Text.Json.Serialization;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // 添加服務到容器
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-    });
-
-// 添加 DbContext
-builder.Services.AddDbContext<OrderDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("OrderDatabase")));
-
-// 添加 Swagger
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { 
-        Title = "Order Service API", 
-        Version = "v1",
-        Description = "訂單服務 API",
-        Contact = new OpenApiContact
-        {
-            Name = "API Support",
-            Email = "support@example.com"
-        }
-    });
+builder.Services.AddSwaggerGen();
 
-    // 設置 XML 註釋文件路徑
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    c.IncludeXmlComments(xmlPath);
-    
-    c.EnableAnnotations();
+// 添加數據庫上下文
+builder.Services.AddDbContext<OrderDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-    // 添加 JWT 認證
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-
-// 添加認證
-builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer(options =>
-    {
-        options.Authority = builder.Configuration["JwtSettings:Authority"];
-        options.Audience = builder.Configuration["JwtSettings:Audience"];
-        options.RequireHttpsMetadata = false; // 開發環境可設為 false
-    });
-
-// 添加授權
-builder.Services.AddAuthorization();
-
-// 添加服務
+// 註冊服務
 builder.Services.AddScoped<IOrderService, OrderService.Services.OrderService>();
 builder.Services.AddScoped<ICartService, CartService>();
 
-// 添加健康檢查
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<OrderDbContext>();
+// 註冊消息發布器
+builder.Services.AddScoped<OrderEventPublisher>();
+
+// 添加消息總線和相關服務
+builder.Services.AddMessageBus(
+    builder.Configuration,
+    Assembly.GetExecutingAssembly()); // 使用當前程序集中的消息處理器
 
 var app = builder.Build();
 
-// 配置 HTTP 請求管道
+// 配置HTTP請求管道
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    
-    // 在開發環境自動應用遷移
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
-        dbContext.Database.Migrate();
-    }
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
+
 app.UseAuthorization();
+
 app.MapControllers();
-app.MapHealthChecks("/health");
+
+// 啟動消息處理器
+app.Services.StartMessageHandlers(Assembly.GetExecutingAssembly());
 
 app.Run();

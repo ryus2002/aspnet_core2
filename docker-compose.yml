@@ -4,194 +4,112 @@ services:
   # API Gateway
   api-gateway:
     build:
-      context: ./services/api-gateway
-      dockerfile: Dockerfile
-    container_name: api-gateway
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
     ports:
       - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - auth-service
       - product-service
       - order-service
       - payment-service
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    networks:
-      - microservices-network
+      - rabbitmq
 
   # 認證服務
   auth-service:
     build:
-      context: ./services/auth-service
-      dockerfile: Dockerfile
-    container_name: auth-service
+      context: .
+      dockerfile: services/auth-service/Dockerfile
     ports:
       - "5001:80"
-    depends_on:
-      - auth-db
-      - rabbitmq
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=auth-db;Port=3306;Database=user_service;User=user_service;Password=password;
-      - JWT__Secret=your_jwt_secret_key_here
-      - JWT__Issuer=auth-service
-      - JWT__Audience=microservices-client
-      - JWT__ExpiryMinutes=60
-    networks:
-      - microservices-network
-
-  # 認證服務數據庫 (MySQL)
-  auth-db:
-    image: mysql:8.0
-    container_name: auth-service-db
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: user_service
-      MYSQL_USER: user_service
-      MYSQL_PASSWORD: password
-    ports:
-      - "3306:3306"
-    volumes:
-      - auth-db-data:/var/lib/mysql
-      - ./services/auth-service/init-scripts:/docker-entrypoint-initdb.d
-    networks:
-      - microservices-network
-    command: --default-authentication-plugin=mysql_native_password
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=AuthService;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+      - RabbitMQ__HostName=rabbitmq
+    depends_on:
+      - sqlserver
+      - rabbitmq
 
   # 商品服務
   product-service:
     build:
-      context: ./services/product-service
-      dockerfile: Dockerfile
-    container_name: product-service
+      context: .
+      dockerfile: services/product-service/Dockerfile
     ports:
       - "5002:80"
-    depends_on:
-      - product-db
-      - rabbitmq
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - MongoDB__ConnectionString=mongodb://product_user:product_password@product-db:27017/product_service
-    networks:
-      - microservices-network
-
-  # 商品服務數據庫 (MongoDB)
-  product-db:
-    image: mongo:6.0
-    container_name: product-service-db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-    ports:
-      - "27017:27017"
-    volumes:
-      - product-db-data:/data/db
-      - ./services/product-service/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
-    networks:
-      - microservices-network
+      - MongoDB__ConnectionString=mongodb://mongodb:27017
+      - MongoDB__DatabaseName=ProductService
+      - RabbitMQ__HostName=rabbitmq
+    depends_on:
+      - mongodb
+      - rabbitmq
 
   # 訂單服務
   order-service:
     build:
-      context: ./services/order-service
-      dockerfile: Dockerfile
-    container_name: order-service
+      context: .
+      dockerfile: services/order-service/Dockerfile
     ports:
-      - "5004:80"
-    depends_on:
-      - order-db
-      - rabbitmq
+      - "5003:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=order-db;Port=5433;Database=order_service;Username=postgres;Password=postgres;
-    networks:
-      - microservices-network
-
-  # 訂單服務數據庫 (PostgreSQL)
-  order-db:
-    image: postgres:14
-    container_name: order-service-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: order_service
-    ports:
-      - "5433:5432"  # 注意：避免與支付服務的 PostgreSQL 端口衝突
-    volumes:
-      - order-db-data:/var/lib/postgresql/data
-      - ./services/order-service/init-scripts:/docker-entrypoint-initdb.d
-    networks:
-      - microservices-network
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=OrderService;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+      - RabbitMQ__HostName=rabbitmq
+    depends_on:
+      - sqlserver
+      - rabbitmq
 
   # 支付服務
   payment-service:
     build:
-      context: ./services/payment-service
-      dockerfile: Dockerfile
-    container_name: payment-service
+      context: .
+      dockerfile: services/payment-service/Dockerfile
     ports:
-      - "5003:80"
-    depends_on:
-      - payment-db
-      - payment-cache
-      - rabbitmq
+      - "5004:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=payment-db;Port=5432;Database=payment_service;Username=payment_user;Password=payment_password;
-      - Redis__ConnectionString=payment-cache:6379
-    networks:
-      - microservices-network
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PaymentService;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+      - RabbitMQ__HostName=rabbitmq
+    depends_on:
+      - sqlserver
+      - rabbitmq
 
-  # 支付服務數據庫 (PostgreSQL)
-  payment-db:
-    image: postgres:14
-    container_name: payment-service-db
+  # SQL Server 數據庫
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      POSTGRES_DB: payment_service
-      POSTGRES_USER: payment_user
-      POSTGRES_PASSWORD: payment_password
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
     ports:
-      - "5432:5432"
+      - "1433:1433"
     volumes:
-      - payment-db-data:/var/lib/postgresql/data
-      - ./services/payment-service/init-scripts:/docker-entrypoint-initdb.d
-    networks:
-      - microservices-network
+      - sqlserver_data:/var/opt/mssql
 
-  # 支付服務緩存 (Redis)
-  payment-cache:
-    image: redis:6
-    container_name: payment-service-cache
+  # MongoDB 數據庫
+  mongodb:
+    image: mongo:latest
     ports:
-      - "6379:6379"
+      - "27017:27017"
     volumes:
-      - payment-cache-data:/data
-    networks:
-      - microservices-network
+      - mongodb_data:/data/db
 
-  # 消息隊列服務 (RabbitMQ)
+  # RabbitMQ 消息隊列
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq
     ports:
-      - "5672:5672"  # AMQP 協議端口
-      - "15672:15672"  # 管理界面端口
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
+      - "5672:5672"   # RabbitMQ 服務端口
+      - "15672:15672" # RabbitMQ 管理界面端口
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
-    networks:
-      - microservices-network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
 volumes:
-  auth-db-data:
-  product-db-data:
-  order-db-data:
-  payment-db-data:
-  payment-cache-data:
-  rabbitmq-data:
-
-networks:
-  microservices-network:
-    external: true
+  sqlserver_data:
+  mongodb_data:
+  rabbitmq_data:
