@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
-using Shared.Messaging.MessageBus;
-using Shared.Messaging.Messages;
+using Shared.Messaging;
 using OrderService.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OrderService.Messaging.Publishers
 {
@@ -36,30 +38,22 @@ namespace OrderService.Messaging.Publishers
                 _logger.LogInformation("準備發布訂單創建事件: OrderId={OrderId}, OrderNumber={OrderNumber}", 
                     order.Id, order.OrderNumber);
 
+                // 創建符合 Shared.Messaging.BaseMessage 的消息
                 var message = new OrderCreatedMessage
                 {
+                    Id = Guid.NewGuid().ToString(),  // 設置 BaseMessage 的 Id
+                    MessageType = "OrderCreated",    // 設置 BaseMessage 的 MessageType
                     OrderId = order.Id,
                     OrderNumber = order.OrderNumber,
                     UserId = order.UserId,
                     TotalAmount = order.TotalAmount,
-                    Status = order.Status,
-                    OrderDate = order.CreatedAt,
-                    Sender = "order-service",
-                    Items = order.Items.Select(item => new OrderItemMessage
-                    {
-                        ProductId = item.ProductId,
-                        VariantId = item.VariantId,
-                        ProductName = item.ProductName,
-                        Quantity = item.Quantity,
-                        UnitPrice = item.UnitPrice,
-                        SubTotal = item.SubTotal
-                    }).ToList()
+                    Status = order.Status
                 };
 
-                await _messageBus.PublishAsync(message);
-
+                // 發布消息
+                await _messageBus.PublishAsync(message, "ecommerce", "order.created");
                 _logger.LogInformation("訂單創建事件已發布: OrderId={OrderId}, MessageId={MessageId}", 
-                    order.Id, message.MessageId);
+                    order.Id, message.Id);
             }
             catch (Exception ex)
             {
@@ -83,22 +77,24 @@ namespace OrderService.Messaging.Publishers
                 _logger.LogInformation("準備發布訂單狀態更新事件: OrderId={OrderId}, OldStatus={OldStatus}, NewStatus={NewStatus}", 
                     order.Id, oldStatus, newStatus);
 
+                // 創建符合 Shared.Messaging.BaseMessage 的消息
                 var message = new OrderStatusChangedMessage
                 {
+                    Id = Guid.NewGuid().ToString(),  // 設置 BaseMessage 的 Id
+                    MessageType = "OrderStatusChanged",  // 設置 BaseMessage 的 MessageType
                     OrderId = order.Id,
                     OrderNumber = order.OrderNumber,
                     UserId = order.UserId,
                     OldStatus = oldStatus,
                     NewStatus = newStatus,
-                    Reason = reason,
-                    ChangedAt = DateTime.UtcNow,
-                    Sender = "order-service"
+                    Reason = reason
                 };
 
-                await _messageBus.PublishAsync(message);
+                // 發布消息
+                await _messageBus.PublishAsync(message, "ecommerce", "order.status.changed");
 
                 _logger.LogInformation("訂單狀態更新事件已發布: OrderId={OrderId}, MessageId={MessageId}", 
-                    order.Id, message.MessageId);
+                    order.Id, message.Id);
             }
             catch (Exception ex)
             {
@@ -106,6 +102,37 @@ namespace OrderService.Messaging.Publishers
                 throw;
             }
         }
+    }
+
+    /// <summary>
+    /// 訂單創建消息
+    /// </summary>
+    public class OrderCreatedMessage : BaseMessage
+    {
+        /// <summary>
+        /// 訂單ID
+        /// </summary>
+        public string OrderId { get; set; } = null!;
+
+        /// <summary>
+        /// 訂單編號
+        /// </summary>
+        public string OrderNumber { get; set; } = null!;
+
+        /// <summary>
+        /// 用戶ID
+        /// </summary>
+        public string UserId { get; set; } = null!;
+
+        /// <summary>
+        /// 訂單總金額
+        /// </summary>
+        public decimal TotalAmount { get; set; }
+
+        /// <summary>
+        /// 訂單狀態
+        /// </summary>
+        public string Status { get; set; } = null!;
     }
 
     /// <summary>
@@ -142,10 +169,5 @@ namespace OrderService.Messaging.Publishers
         /// 更新原因
         /// </summary>
         public string? Reason { get; set; }
-
-        /// <summary>
-        /// 狀態更新時間
-        /// </summary>
-        public DateTime ChangedAt { get; set; }
     }
 }

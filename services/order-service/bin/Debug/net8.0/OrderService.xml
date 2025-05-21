@@ -585,6 +585,100 @@
             是否有下一頁
             </summary>
         </member>
+        <member name="T:OrderService.Messaging.Publishers.OrderEventPublisher">
+            <summary>
+            訂單事件發布器，負責發送訂單相關事件
+            </summary>
+        </member>
+        <member name="M:OrderService.Messaging.Publishers.OrderEventPublisher.#ctor(Shared.Messaging.IMessageBus,Microsoft.Extensions.Logging.ILogger{OrderService.Messaging.Publishers.OrderEventPublisher})">
+            <summary>
+            構造函數
+            </summary>
+            <param name="messageBus">消息總線</param>
+            <param name="logger">日誌記錄器</param>
+        </member>
+        <member name="M:OrderService.Messaging.Publishers.OrderEventPublisher.PublishOrderCreatedEventAsync(OrderService.Models.Order)">
+            <summary>
+            發布訂單創建事件
+            </summary>
+            <param name="order">訂單對象</param>
+            <returns>異步任務</returns>
+        </member>
+        <member name="M:OrderService.Messaging.Publishers.OrderEventPublisher.PublishOrderStatusChangedEventAsync(OrderService.Models.Order,System.String,System.String,System.String)">
+            <summary>
+            發布訂單狀態更新事件
+            </summary>
+            <param name="order">訂單對象</param>
+            <param name="oldStatus">舊狀態</param>
+            <param name="newStatus">新狀態</param>
+            <param name="reason">更新原因</param>
+            <returns>異步任務</returns>
+        </member>
+        <member name="T:OrderService.Messaging.Publishers.OrderCreatedMessage">
+            <summary>
+            訂單創建消息
+            </summary>
+        </member>
+        <member name="P:OrderService.Messaging.Publishers.OrderCreatedMessage.OrderId">
+            <summary>
+            訂單ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Messaging.Publishers.OrderCreatedMessage.OrderNumber">
+            <summary>
+            訂單編號
+            </summary>
+        </member>
+        <member name="P:OrderService.Messaging.Publishers.OrderCreatedMessage.UserId">
+            <summary>
+            用戶ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Messaging.Publishers.OrderCreatedMessage.TotalAmount">
+            <summary>
+            訂單總金額
+            </summary>
+        </member>
+        <member name="P:OrderService.Messaging.Publishers.OrderCreatedMessage.Status">
+            <summary>
+            訂單狀態
+            </summary>
+        </member>
+        <member name="T:OrderService.Messaging.Publishers.OrderStatusChangedMessage">
+            <summary>
+            訂單狀態更新消息
+            </summary>
+        </member>
+        <member name="P:OrderService.Messaging.Publishers.OrderStatusChangedMessage.OrderId">
+            <summary>
+            訂單ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Messaging.Publishers.OrderStatusChangedMessage.OrderNumber">
+            <summary>
+            訂單編號
+            </summary>
+        </member>
+        <member name="P:OrderService.Messaging.Publishers.OrderStatusChangedMessage.UserId">
+            <summary>
+            用戶ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Messaging.Publishers.OrderStatusChangedMessage.OldStatus">
+            <summary>
+            舊狀態
+            </summary>
+        </member>
+        <member name="P:OrderService.Messaging.Publishers.OrderStatusChangedMessage.NewStatus">
+            <summary>
+            新狀態
+            </summary>
+        </member>
+        <member name="P:OrderService.Messaging.Publishers.OrderStatusChangedMessage.Reason">
+            <summary>
+            更新原因
+            </summary>
+        </member>
         <member name="T:OrderService.Models.Address">
             <summary>
             地址模型
@@ -1281,6 +1375,9 @@
         </member>
         <member name="T:OrderService.Services.OrderService">
             <summary>
+            訂單服務的創建訂單相關功能
+            </summary>
+            <summary>
             訂單服務實現
             </summary>
             <summary>
@@ -1290,7 +1387,15 @@
             訂單服務實現 - 狀態管理功能
             </summary>
         </member>
-        <member name="M:OrderService.Services.OrderService.#ctor(OrderService.Data.OrderDbContext,OrderService.Services.ICartService,Microsoft.Extensions.Logging.ILogger{OrderService.Services.OrderService})">
+        <member name="M:OrderService.Services.OrderService.CreateOrderWithEventsAsync(System.String,OrderService.DTOs.CreateOrderRequest)">
+            <summary>
+            創建訂單並發布事件
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="request">創建訂單請求</param>
+            <returns>訂單響應</returns>
+        </member>
+        <member name="M:OrderService.Services.OrderService.#ctor(OrderService.Data.OrderDbContext,OrderService.Services.ICartService,Microsoft.Extensions.Logging.ILogger{OrderService.Services.OrderService},OrderService.Messaging.Publishers.OrderEventPublisher)">
             <summary>
             建構函數
             </summary>

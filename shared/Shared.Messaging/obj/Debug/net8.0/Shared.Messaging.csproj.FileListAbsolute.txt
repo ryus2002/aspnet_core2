@@ -1,0 +1,13 @@
+E:\code\net\project1\shared\Shared.Messaging\obj\Debug\net8.0\Shared.Messaging.csproj.AssemblyReference.cache
+E:\code\net\project1\shared\Shared.Messaging\obj\Debug\net8.0\Shared.Messaging.GeneratedMSBuildEditorConfig.editorconfig
+E:\code\net\project1\shared\Shared.Messaging\obj\Debug\net8.0\Shared.Messaging.AssemblyInfoInputs.cache
+E:\code\net\project1\shared\Shared.Messaging\obj\Debug\net8.0\Shared.Messaging.AssemblyInfo.cs
+E:\code\net\project1\shared\Shared.Messaging\obj\Debug\net8.0\Shared.Messaging.csproj.CoreCompileInputs.cache
+E:\code\net\project1\shared\Shared.Messaging\obj\Debug\net8.0\Shared.Messaging.sourcelink.json
+E:\code\net\project1\shared\Shared.Messaging\bin\Debug\net8.0\Shared.Messaging.deps.json
+E:\code\net\project1\shared\Shared.Messaging\bin\Debug\net8.0\Shared.Messaging.dll
+E:\code\net\project1\shared\Shared.Messaging\bin\Debug\net8.0\Shared.Messaging.pdb
+E:\code\net\project1\shared\Shared.Messaging\obj\Debug\net8.0\Shared.Messaging.dll
+E:\code\net\project1\shared\Shared.Messaging\obj\Debug\net8.0\refint\Shared.Messaging.dll
+E:\code\net\project1\shared\Shared.Messaging\obj\Debug\net8.0\Shared.Messaging.pdb
+E:\code\net\project1\shared\Shared.Messaging\obj\Debug\net8.0\ref\Shared.Messaging.dll

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
 using OrderService.DTOs;
 using OrderService.Models;
+using OrderService.Messaging.Publishers;
 using System.Text.Json;
 
 namespace OrderService.Services
@@ -14,6 +15,7 @@ namespace OrderService.Services
         private readonly OrderDbContext _dbContext;
         private readonly ICartService _cartService;
         private readonly ILogger<OrderService> _logger;
+        private readonly OrderEventPublisher _orderEventPublisher;
 
         /// <summary>
         /// 建構函數
@@ -21,11 +23,13 @@ namespace OrderService.Services
         public OrderService(
             OrderDbContext dbContext, 
             ICartService cartService, 
-            ILogger<OrderService> logger)
+            ILogger<OrderService> logger,
+            OrderEventPublisher orderEventPublisher)
         {
             _dbContext = dbContext;
             _cartService = cartService;
             _logger = logger;
+            _orderEventPublisher = orderEventPublisher;
         }
 
         /// <summary>
@@ -185,6 +189,9 @@ namespace OrderService.Services
 
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                // 發送訂單創建事件
+                await _orderEventPublisher.PublishOrderCreatedEventAsync(order);
 
                 _logger.LogInformation("Created order {OrderId} for user {UserId}", order.Id, userId);
 
