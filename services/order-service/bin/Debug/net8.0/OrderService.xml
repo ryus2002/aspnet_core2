@@ -1,0 +1,1364 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>OrderService</name>
+    </assembly>
+    <members>
+        <member name="T:OrderService.Data.OrderDbContext">
+            <summary>
+            訂單服務資料庫上下文
+            </summary>
+        </member>
+        <member name="P:OrderService.Data.OrderDbContext.Carts">
+            <summary>
+            購物車
+            </summary>
+        </member>
+        <member name="P:OrderService.Data.OrderDbContext.CartItems">
+            <summary>
+            購物車項目
+            </summary>
+        </member>
+        <member name="P:OrderService.Data.OrderDbContext.Orders">
+            <summary>
+            訂單
+            </summary>
+        </member>
+        <member name="P:OrderService.Data.OrderDbContext.OrderItems">
+            <summary>
+            訂單項目
+            </summary>
+        </member>
+        <member name="P:OrderService.Data.OrderDbContext.Addresses">
+            <summary>
+            地址
+            </summary>
+        </member>
+        <member name="P:OrderService.Data.OrderDbContext.OrderStatusHistories">
+            <summary>
+            訂單狀態歷史
+            </summary>
+        </member>
+        <member name="P:OrderService.Data.OrderDbContext.OrderEvents">
+            <summary>
+            訂單事件
+            </summary>
+        </member>
+        <member name="M:OrderService.Data.OrderDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            模型創建時配置
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.CartRequestBase">
+            <summary>
+            購物車請求基類
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartRequestBase.SessionId">
+            <summary>
+            會話ID (未登入用戶)
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.CreateCartRequest">
+            <summary>
+            創建購物車請求
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CreateCartRequest.UserId">
+            <summary>
+            用戶ID (已登入用戶)
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CreateCartRequest.Metadata">
+            <summary>
+            額外元數據
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.AddCartItemRequest">
+            <summary>
+            添加購物車項目請求
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddCartItemRequest.ProductId">
+            <summary>
+            商品ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddCartItemRequest.VariantId">
+            <summary>
+            商品變體ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddCartItemRequest.Quantity">
+            <summary>
+            數量
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.UpdateCartItemRequest">
+            <summary>
+            更新購物車項目請求
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.UpdateCartItemRequest.Quantity">
+            <summary>
+            數量
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.CartItemResponse">
+            <summary>
+            購物車項目響應
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartItemResponse.Id">
+            <summary>
+            購物車項目ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartItemResponse.ProductId">
+            <summary>
+            商品ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartItemResponse.VariantId">
+            <summary>
+            商品變體ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartItemResponse.Quantity">
+            <summary>
+            數量
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartItemResponse.UnitPrice">
+            <summary>
+            單價
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartItemResponse.Name">
+            <summary>
+            商品名稱
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartItemResponse.Attributes">
+            <summary>
+            商品屬性
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartItemResponse.AddedAt">
+            <summary>
+            添加時間
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartItemResponse.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.CartResponse">
+            <summary>
+            購物車響應
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartResponse.Id">
+            <summary>
+            購物車ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartResponse.UserId">
+            <summary>
+            用戶ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartResponse.SessionId">
+            <summary>
+            會話ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartResponse.Status">
+            <summary>
+            狀態
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartResponse.Items">
+            <summary>
+            購物車項目
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartResponse.ItemsCount">
+            <summary>
+            項目總數
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartResponse.TotalAmount">
+            <summary>
+            總金額
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartResponse.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartResponse.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartResponse.ExpiresAt">
+            <summary>
+            過期時間
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CartResponse.Metadata">
+            <summary>
+            額外元數據
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.CreateOrderRequest">
+            <summary>
+            創建訂單請求
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CreateOrderRequest.CartId">
+            <summary>
+            購物車ID或會話ID (二選一必填)
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CreateOrderRequest.SessionId">
+            <summary>
+            會話ID (與CartId二選一)
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CreateOrderRequest.ShippingAddressId">
+            <summary>
+            配送地址ID (可選，如果已有地址)
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CreateOrderRequest.BillingAddressId">
+            <summary>
+            帳單地址ID (可選，如果已有地址)
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CreateOrderRequest.ShippingAddress">
+            <summary>
+            配送地址 (如果沒有現有地址ID)
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CreateOrderRequest.BillingAddress">
+            <summary>
+            帳單地址 (如果沒有現有地址ID)
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CreateOrderRequest.ShippingMethod">
+            <summary>
+            配送方式
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CreateOrderRequest.Notes">
+            <summary>
+            訂單備註
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CreateOrderRequest.Metadata">
+            <summary>
+            額外元數據
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.AddressDTO">
+            <summary>
+            地址DTO
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddressDTO.Name">
+            <summary>
+            收件人/帳單人姓名
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddressDTO.Phone">
+            <summary>
+            電話
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddressDTO.AddressLine1">
+            <summary>
+            地址行1
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddressDTO.AddressLine2">
+            <summary>
+            地址行2
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddressDTO.City">
+            <summary>
+            城市
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddressDTO.State">
+            <summary>
+            州/省
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddressDTO.PostalCode">
+            <summary>
+            郵政編碼
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddressDTO.Country">
+            <summary>
+            國家
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddressDTO.SaveAsDefault">
+            <summary>
+            是否保存為默認地址
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.AddressDTO.AddressType">
+            <summary>
+            地址類型: shipping, billing, both
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.UpdateOrderStatusRequest">
+            <summary>
+            更新訂單狀態請求
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.UpdateOrderStatusRequest.Status">
+            <summary>
+            新狀態
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.UpdateOrderStatusRequest.Comment">
+            <summary>
+            狀態變更說明
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.CancelOrderRequest">
+            <summary>
+            取消訂單請求
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.CancelOrderRequest.Reason">
+            <summary>
+            取消原因
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.OrderItemResponse">
+            <summary>
+            訂單項目響應
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderItemResponse.Id">
+            <summary>
+            訂單項目ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderItemResponse.ProductId">
+            <summary>
+            商品ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderItemResponse.VariantId">
+            <summary>
+            商品變體ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderItemResponse.Name">
+            <summary>
+            商品名稱
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderItemResponse.Quantity">
+            <summary>
+            數量
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderItemResponse.UnitPrice">
+            <summary>
+            單價
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderItemResponse.TotalPrice">
+            <summary>
+            總價
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderItemResponse.Attributes">
+            <summary>
+            商品屬性
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderItemResponse.SKU">
+            <summary>
+            庫存單位
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderItemResponse.ImageUrl">
+            <summary>
+            商品圖片URL
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.OrderStatusHistoryResponse">
+            <summary>
+            訂單狀態歷史響應
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderStatusHistoryResponse.Id">
+            <summary>
+            歷史記錄ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderStatusHistoryResponse.Status">
+            <summary>
+            訂單狀態
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderStatusHistoryResponse.Comment">
+            <summary>
+            狀態變更說明
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderStatusHistoryResponse.ChangedBy">
+            <summary>
+            操作人ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderStatusHistoryResponse.ChangedAt">
+            <summary>
+            變更時間
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.OrderResponse">
+            <summary>
+            訂單響應
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.Id">
+            <summary>
+            訂單ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.OrderNumber">
+            <summary>
+            訂單編號
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.UserId">
+            <summary>
+            用戶ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.Status">
+            <summary>
+            訂單狀態
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.TotalAmount">
+            <summary>
+            訂單總金額
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.ItemsCount">
+            <summary>
+            訂單項目數量
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.ShippingAddress">
+            <summary>
+            配送地址
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.BillingAddress">
+            <summary>
+            帳單地址
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.PaymentId">
+            <summary>
+            支付ID
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.ShippingMethod">
+            <summary>
+            配送方式
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.ShippingFee">
+            <summary>
+            配送費用
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.TaxAmount">
+            <summary>
+            稅額
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.DiscountAmount">
+            <summary>
+            折扣金額
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.Notes">
+            <summary>
+            訂單備註
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.CompletedAt">
+            <summary>
+            訂單完成時間
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.CancelledAt">
+            <summary>
+            訂單取消時間
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.CancellationReason">
+            <summary>
+            取消原因
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.Items">
+            <summary>
+            訂單項目
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.StatusHistory">
+            <summary>
+            訂單狀態歷史
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.OrderResponse.Metadata">
+            <summary>
+            額外元數據
+            </summary>
+        </member>
+        <member name="T:OrderService.DTOs.PagedResponse`1">
+            <summary>
+            分頁響應
+            </summary>
+            <typeparam name="T">數據類型</typeparam>
+        </member>
+        <member name="P:OrderService.DTOs.PagedResponse`1.Data">
+            <summary>
+            數據
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.PagedResponse`1.TotalCount">
+            <summary>
+            總記錄數
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.PagedResponse`1.Page">
+            <summary>
+            頁碼
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.PagedResponse`1.PageSize">
+            <summary>
+            每頁大小
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.PagedResponse`1.TotalPages">
+            <summary>
+            總頁數
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.PagedResponse`1.HasPrevious">
+            <summary>
+            是否有上一頁
+            </summary>
+        </member>
+        <member name="P:OrderService.DTOs.PagedResponse`1.HasNext">
+            <summary>
+            是否有下一頁
+            </summary>
+        </member>
+        <member name="T:OrderService.Models.Address">
+            <summary>
+            地址模型
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.Id">
+            <summary>
+            地址ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.UserId">
+            <summary>
+            用戶ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.Name">
+            <summary>
+            收件人/帳單人姓名
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.Phone">
+            <summary>
+            電話
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.AddressLine1">
+            <summary>
+            地址行1
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.AddressLine2">
+            <summary>
+            地址行2
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.City">
+            <summary>
+            城市
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.State">
+            <summary>
+            州/省
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.PostalCode">
+            <summary>
+            郵政編碼
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.Country">
+            <summary>
+            國家
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.IsDefault">
+            <summary>
+            是否為默認地址
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.AddressType">
+            <summary>
+            地址類型: shipping, billing, both
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Address.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="T:OrderService.Models.Cart">
+            <summary>
+            購物車模型
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Cart.Id">
+            <summary>
+            購物車ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Cart.UserId">
+            <summary>
+            用戶ID (已登入用戶)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Cart.SessionId">
+            <summary>
+            會話ID (未登入用戶)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Cart.Status">
+            <summary>
+            狀態: active, abandoned, converted
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Cart.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Cart.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Cart.ExpiresAt">
+            <summary>
+            購物車過期時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Cart.Metadata">
+            <summary>
+            額外元數據 (JSON格式)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Cart.Items">
+            <summary>
+            購物車項目集合
+            </summary>
+        </member>
+        <member name="T:OrderService.Models.CartItem">
+            <summary>
+            購物車項目模型
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.CartItem.Id">
+            <summary>
+            購物車項目ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.CartItem.CartId">
+            <summary>
+            購物車ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.CartItem.ProductId">
+            <summary>
+            商品ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.CartItem.VariantId">
+            <summary>
+            商品變體ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.CartItem.Quantity">
+            <summary>
+            數量
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.CartItem.UnitPrice">
+            <summary>
+            單價
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.CartItem.Name">
+            <summary>
+            商品名稱 (快照)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.CartItem.Attributes">
+            <summary>
+            商品屬性 (顏色、尺寸等) (JSON格式)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.CartItem.AddedAt">
+            <summary>
+            添加時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.CartItem.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.CartItem.Cart">
+            <summary>
+            所屬購物車
+            </summary>
+        </member>
+        <member name="T:OrderService.Models.Order">
+            <summary>
+            訂單模型
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.Id">
+            <summary>
+            訂單ID (UUID格式)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.OrderNumber">
+            <summary>
+            訂單編號 (人類可讀的訂單編號)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.UserId">
+            <summary>
+            用戶ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.Status">
+            <summary>
+            訂單狀態: pending, paid, processing, shipped, delivered, cancelled, refunded
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.TotalAmount">
+            <summary>
+            訂單總金額
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.ItemsCount">
+            <summary>
+            訂單項目數量
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.ShippingAddressId">
+            <summary>
+            配送地址ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.BillingAddressId">
+            <summary>
+            帳單地址ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.PaymentId">
+            <summary>
+            支付ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.ShippingMethod">
+            <summary>
+            配送方式
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.ShippingFee">
+            <summary>
+            配送費用
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.TaxAmount">
+            <summary>
+            稅額
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.DiscountAmount">
+            <summary>
+            折扣金額
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.Notes">
+            <summary>
+            訂單備註
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.CompletedAt">
+            <summary>
+            訂單完成時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.CancelledAt">
+            <summary>
+            訂單取消時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.CancellationReason">
+            <summary>
+            取消原因
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.Metadata">
+            <summary>
+            額外元數據 (JSON格式)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.Items">
+            <summary>
+            訂單項目集合
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.StatusHistory">
+            <summary>
+            訂單狀態歷史集合
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.Order.Events">
+            <summary>
+            訂單事件集合
+            </summary>
+        </member>
+        <member name="T:OrderService.Models.OrderEvent">
+            <summary>
+            訂單事件模型
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderEvent.Id">
+            <summary>
+            事件ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderEvent.OrderId">
+            <summary>
+            訂單ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderEvent.EventType">
+            <summary>
+            事件類型: created, updated, cancelled, etc.
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderEvent.Payload">
+            <summary>
+            事件數據 (JSON格式)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderEvent.Processed">
+            <summary>
+            是否已處理
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderEvent.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderEvent.ProcessedAt">
+            <summary>
+            處理時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderEvent.Order">
+            <summary>
+            所屬訂單
+            </summary>
+        </member>
+        <member name="T:OrderService.Models.OrderItem">
+            <summary>
+            訂單項目模型
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderItem.Id">
+            <summary>
+            訂單項目ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderItem.OrderId">
+            <summary>
+            訂單ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderItem.ProductId">
+            <summary>
+            商品ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderItem.VariantId">
+            <summary>
+            商品變體ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderItem.Name">
+            <summary>
+            商品名稱 (快照)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderItem.Quantity">
+            <summary>
+            數量
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderItem.UnitPrice">
+            <summary>
+            單價 (快照)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderItem.TotalPrice">
+            <summary>
+            總價
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderItem.Attributes">
+            <summary>
+            商品屬性 (顏色、尺寸等) (JSON格式)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderItem.SKU">
+            <summary>
+            庫存單位 (快照)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderItem.ImageUrl">
+            <summary>
+            商品圖片URL (快照)
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderItem.Order">
+            <summary>
+            所屬訂單
+            </summary>
+        </member>
+        <member name="T:OrderService.Models.OrderStatusHistory">
+            <summary>
+            訂單狀態歷史模型
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderStatusHistory.Id">
+            <summary>
+            歷史記錄ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderStatusHistory.OrderId">
+            <summary>
+            訂單ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderStatusHistory.Status">
+            <summary>
+            訂單狀態
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderStatusHistory.Comment">
+            <summary>
+            狀態變更說明
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderStatusHistory.ChangedBy">
+            <summary>
+            操作人ID
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderStatusHistory.ChangedAt">
+            <summary>
+            變更時間
+            </summary>
+        </member>
+        <member name="P:OrderService.Models.OrderStatusHistory.Order">
+            <summary>
+            所屬訂單
+            </summary>
+        </member>
+        <member name="T:OrderService.Services.CartService">
+            <summary>
+            購物車服務實現 - 添加、更新和刪除購物車項目
+            </summary>
+            <summary>
+            購物車服務實現
+            </summary>
+            <summary>
+            購物車服務實現 - 工具方法和輔助功能
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.AddCartItemAsync(System.Int32,OrderService.DTOs.AddCartItemRequest)">
+            <summary>
+            添加購物車項目
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.UpdateCartItemAsync(System.Int32,System.Int32,OrderService.DTOs.UpdateCartItemRequest)">
+            <summary>
+            更新購物車項目
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.RemoveCartItemAsync(System.Int32,System.Int32)">
+            <summary>
+            刪除購物車項目
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.ClearCartAsync(System.Int32)">
+            <summary>
+            清空購物車
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.#ctor(OrderService.Data.OrderDbContext,Microsoft.Extensions.Logging.ILogger{OrderService.Services.CartService})">
+            <summary>
+            建構函數
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.CreateCartAsync(OrderService.DTOs.CreateCartRequest)">
+            <summary>
+            創建購物車
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.GetCartByIdAsync(System.Int32)">
+            <summary>
+            根據ID獲取購物車
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.GetCartBySessionIdAsync(System.String)">
+            <summary>
+            根據會話ID獲取購物車
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.GetCartByUserIdAsync(System.String)">
+            <summary>
+            根據用戶ID獲取購物車
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.MergeCartsAsync(System.String,System.String)">
+            <summary>
+            合併購物車
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.UpdateCartStatusAsync(System.Int32,System.String)">
+            <summary>
+            更新購物車狀態
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.CleanupExpiredCartsAsync">
+            <summary>
+            清理過期購物車
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.CartService.GetCartResponseAsync(OrderService.Models.Cart)">
+            <summary>
+            將購物車模型轉換為響應DTO
+            </summary>
+        </member>
+        <member name="T:OrderService.Services.ICartService">
+            <summary>
+            購物車服務介面
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.ICartService.CreateCartAsync(OrderService.DTOs.CreateCartRequest)">
+            <summary>
+            創建購物車
+            </summary>
+            <param name="request">創建購物車請求</param>
+            <returns>購物車響應</returns>
+        </member>
+        <member name="M:OrderService.Services.ICartService.GetCartByIdAsync(System.Int32)">
+            <summary>
+            根據ID獲取購物車
+            </summary>
+            <param name="id">購物車ID</param>
+            <returns>購物車響應</returns>
+        </member>
+        <member name="M:OrderService.Services.ICartService.GetCartBySessionIdAsync(System.String)">
+            <summary>
+            根據會話ID獲取購物車
+            </summary>
+            <param name="sessionId">會話ID</param>
+            <returns>購物車響應</returns>
+        </member>
+        <member name="M:OrderService.Services.ICartService.GetCartByUserIdAsync(System.String)">
+            <summary>
+            根據用戶ID獲取購物車
+            </summary>
+            <param name="userId">用戶ID</param>
+            <returns>購物車響應</returns>
+        </member>
+        <member name="M:OrderService.Services.ICartService.AddCartItemAsync(System.Int32,OrderService.DTOs.AddCartItemRequest)">
+            <summary>
+            添加購物車項目
+            </summary>
+            <param name="cartId">購物車ID</param>
+            <param name="request">添加購物車項目請求</param>
+            <returns>購物車響應</returns>
+        </member>
+        <member name="M:OrderService.Services.ICartService.UpdateCartItemAsync(System.Int32,System.Int32,OrderService.DTOs.UpdateCartItemRequest)">
+            <summary>
+            更新購物車項目
+            </summary>
+            <param name="cartId">購物車ID</param>
+            <param name="itemId">購物車項目ID</param>
+            <param name="request">更新購物車項目請求</param>
+            <returns>購物車響應</returns>
+        </member>
+        <member name="M:OrderService.Services.ICartService.RemoveCartItemAsync(System.Int32,System.Int32)">
+            <summary>
+            刪除購物車項目
+            </summary>
+            <param name="cartId">購物車ID</param>
+            <param name="itemId">購物車項目ID</param>
+            <returns>購物車響應</returns>
+        </member>
+        <member name="M:OrderService.Services.ICartService.ClearCartAsync(System.Int32)">
+            <summary>
+            清空購物車
+            </summary>
+            <param name="cartId">購物車ID</param>
+            <returns>購物車響應</returns>
+        </member>
+        <member name="M:OrderService.Services.ICartService.MergeCartsAsync(System.String,System.String)">
+            <summary>
+            合併購物車
+            </summary>
+            <param name="sessionId">會話ID</param>
+            <param name="userId">用戶ID</param>
+            <returns>合併後的購物車響應</returns>
+        </member>
+        <member name="M:OrderService.Services.ICartService.UpdateCartStatusAsync(System.Int32,System.String)">
+            <summary>
+            更新購物車狀態
+            </summary>
+            <param name="cartId">購物車ID</param>
+            <param name="status">新狀態</param>
+            <returns>更新後的購物車響應</returns>
+        </member>
+        <member name="M:OrderService.Services.ICartService.CleanupExpiredCartsAsync">
+            <summary>
+            清理過期購物車
+            </summary>
+            <returns>清理的購物車數量</returns>
+        </member>
+        <member name="T:OrderService.Services.IOrderService">
+            <summary>
+            訂單服務介面
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.IOrderService.CreateOrderAsync(System.String,OrderService.DTOs.CreateOrderRequest)">
+            <summary>
+            創建訂單
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="request">創建訂單請求</param>
+            <returns>訂單響應</returns>
+        </member>
+        <member name="M:OrderService.Services.IOrderService.GetOrderByIdAsync(System.String)">
+            <summary>
+            根據ID獲取訂單
+            </summary>
+            <param name="id">訂單ID</param>
+            <returns>訂單響應</returns>
+        </member>
+        <member name="M:OrderService.Services.IOrderService.GetOrderByNumberAsync(System.String)">
+            <summary>
+            根據訂單編號獲取訂單
+            </summary>
+            <param name="orderNumber">訂單編號</param>
+            <returns>訂單響應</returns>
+        </member>
+        <member name="M:OrderService.Services.IOrderService.GetUserOrdersAsync(System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            獲取用戶的訂單列表
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="status">訂單狀態</param>
+            <param name="page">頁碼</param>
+            <param name="pageSize">每頁大小</param>
+            <returns>分頁訂單響應</returns>
+        </member>
+        <member name="M:OrderService.Services.IOrderService.UpdateOrderStatusAsync(System.String,OrderService.DTOs.UpdateOrderStatusRequest,System.String)">
+            <summary>
+            更新訂單狀態
+            </summary>
+            <param name="id">訂單ID</param>
+            <param name="request">更新訂單狀態請求</param>
+            <param name="userId">操作用戶ID</param>
+            <returns>更新後的訂單響應</returns>
+        </member>
+        <member name="M:OrderService.Services.IOrderService.CancelOrderAsync(System.String,OrderService.DTOs.CancelOrderRequest,System.String)">
+            <summary>
+            取消訂單
+            </summary>
+            <param name="id">訂單ID</param>
+            <param name="request">取消訂單請求</param>
+            <param name="userId">操作用戶ID</param>
+            <returns>取消後的訂單響應</returns>
+        </member>
+        <member name="M:OrderService.Services.IOrderService.UpdateOrderPaymentAsync(System.String,System.String)">
+            <summary>
+            更新訂單支付信息
+            </summary>
+            <param name="id">訂單ID</param>
+            <param name="paymentId">支付ID</param>
+            <returns>更新後的訂單響應</returns>
+        </member>
+        <member name="M:OrderService.Services.IOrderService.GetOrderStatusHistoryAsync(System.String)">
+            <summary>
+            獲取訂單狀態歷史
+            </summary>
+            <param name="id">訂單ID</param>
+            <returns>訂單狀態歷史列表</returns>
+        </member>
+        <member name="M:OrderService.Services.IOrderService.GenerateOrderNumberAsync">
+            <summary>
+            生成訂單編號
+            </summary>
+            <returns>訂單編號</returns>
+        </member>
+        <member name="T:OrderService.Services.OrderService">
+            <summary>
+            訂單服務實現
+            </summary>
+            <summary>
+            訂單服務實現 - 查詢功能
+            </summary>
+            <summary>
+            訂單服務實現 - 狀態管理功能
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.#ctor(OrderService.Data.OrderDbContext,OrderService.Services.ICartService,Microsoft.Extensions.Logging.ILogger{OrderService.Services.OrderService})">
+            <summary>
+            建構函數
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.CreateOrderAsync(System.String,OrderService.DTOs.CreateOrderRequest)">
+            <summary>
+            創建訂單
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.GetOrderByIdAsync(System.String)">
+            <summary>
+            根據ID獲取訂單
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.GetOrderByNumberAsync(System.String)">
+            <summary>
+            根據訂單編號獲取訂單
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.GenerateOrderNumberAsync">
+            <summary>
+            生成訂單編號
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.GetUserOrdersAsync(System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            獲取用戶的訂單列表
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.GetOrderStatusHistoryAsync(System.String)">
+            <summary>
+            獲取訂單狀態歷史
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.GetOrderResponseAsync(System.String)">
+            <summary>
+            將訂單實體轉換為響應DTO
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.MapAddressToDTO(OrderService.Models.Address)">
+            <summary>
+            將地址實體映射為DTO
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.UpdateOrderStatusAsync(System.String,OrderService.DTOs.UpdateOrderStatusRequest,System.String)">
+            <summary>
+            更新訂單狀態
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.CancelOrderAsync(System.String,OrderService.DTOs.CancelOrderRequest,System.String)">
+            <summary>
+            取消訂單
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.UpdateOrderPaymentAsync(System.String,System.String)">
+            <summary>
+            更新訂單支付信息
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.IsValidStatusTransition(System.String,System.String)">
+            <summary>
+            驗證訂單狀態轉換是否合法
+            </summary>
+        </member>
+        <member name="M:OrderService.Services.OrderService.CanCancelOrder(System.String)">
+            <summary>
+            檢查訂單是否可以取消
+            </summary>
+        </member>
+    </members>
+</doc>
