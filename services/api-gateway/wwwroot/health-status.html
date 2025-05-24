@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微服務電商平台 - 健康狀態監控</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .header {
+            margin-bottom: 30px;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            font-weight: bold;
+        }
+        .status-healthy {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-unhealthy {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .status-degraded {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-unknown {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        .system-info {
+            font-size: 0.9rem;
+        }
+        .refresh-btn {
+            margin-bottom: 20px;
+        }
+        .timestamp {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+        .detail-row {
+            border-top: 1px solid #dee2e6;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        .service-badge {
+            font-size: 0.8rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .memory-usage {
+            height: 20px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>微服務電商平台 - 健康狀態監控</h1>
+            <p class="text-muted">即時監控所有微服務的健康狀態和系統資源</p>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <button id="refreshBtn" class="btn btn-primary refresh-btn">
+                    <i class="bi bi-arrow-clockwise"></i> 重新整理
+                </button>
+                <div class="form-check form-switch d-inline-block ms-3">
+                    <input class="form-check-input" type="checkbox" id="autoRefreshToggle">
+                    <label class="form-check-label" for="autoRefreshToggle">自動重新整理 (30秒)</label>
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <span id="overallStatus" class="badge bg-secondary">載入中...</span>
+                <span id="lastUpdated" class="timestamp">最後更新時間: 載入中...</span>
+            </div>
+        </div>
+        
+        <div class="row" id="servicesContainer">
+            <!-- 服務卡片將在這裡動態生成 -->
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">載入中...</span>
+                </div>
+                <p class="mt-2">正在載入服務健康狀態...</p>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">系統資訊</div>
+                    <div class="card-body system-info" id="systemInfoContainer">
+                        <!-- 系統資訊將在這裡動態生成 -->
+                        <p class="text-center">載入中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 全域變數
+        let autoRefreshInterval;
+        const AUTO_REFRESH_INTERVAL = 30000; // 30秒
+        
+        // 頁面載入時執行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始載入健康狀態
+            fetchHealthStatus();
+            
+            // 重新整理按鈕點擊事件
+            document.getElementById('refreshBtn').addEventListener('click', fetchHealthStatus);
+            
+            // 自動重新整理切換
+            document.getElementById('autoRefreshToggle').addEventListener('change', function(e) {
+                if (e.target.checked) {
+                    startAutoRefresh();
+                } else {
+                    stopAutoRefresh();
+                }
+            });
+        });
+        
+        // 開始自動重新整理
+        function startAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            autoRefreshInterval = setInterval(fetchHealthStatus, AUTO_REFRESH_INTERVAL);
+        }
+        
+        // 停止自動重新整理
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+        
+        // 獲取健康狀態
+        function fetchHealthStatus() {
+            fetch('/health/details')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP錯誤: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    updateUI(data);
+                })
+                .catch(error => {
+                    console.error('獲取健康狀態時發生錯誤:', error);
+                    showError(error.message);
+                });
+        }
+        
+        // 更新UI
+        function updateUI(data) {
+            // 更新最後更新時間
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = `最後更新時間: ${formatDateTime(now)}`;
+            
+            // 更新整體狀態
+            const overallStatusElement = document.getElementById('overallStatus');
+            overallStatusElement.textContent = data.status;
+            overallStatusElement.className = `badge ${getStatusBadgeClass(data.status)}`;
+            
+            // 更新服務卡片
+            updateServicesCards(data.services);
+            
+            // 更新系統資訊
+            updateSystemInfo(data.systemInfo);
+        }
+        
+        // 更新服務卡片
+        function updateServicesCards(services) {
+            const container = document.getElementById('servicesContainer');
+            container.innerHTML = ''; // 清空容器
+            
+            services.forEach(service => {
+                const cardHtml = createServiceCard(service);
+                container.innerHTML += cardHtml;
+            });
+        }
+        
+        // 創建服務卡片HTML
+        function createServiceCard(service) {
+            const statusClass = getStatusClass(service.status);
+            const statusBadgeClass = getStatusBadgeClass(service.status);
+            
+            let detailsHtml = '';
+            if (service.details) {
+                detailsHtml += '<div class="detail-row">';
+                
+                // 添加記憶體使用資訊（如果有）
+                if (service.details.memoryUsage) {
+                    const memory = service.details.memoryUsage;
+                    const totalMemoryMB = memory.totalMemoryMB || 0;
+                    const managedMemoryMB = memory.managedMemoryMB || 0;
+                    const memoryPercentage = Math.min(100, Math.round((managedMemoryMB / totalMemoryMB) * 100)) || 0;
+                    
+                    detailsHtml += `
+                        <div class="mb-2">
+                            <small>記憶體使用: ${managedMemoryMB} MB / ${totalMemoryMB} MB</small>
+                            <div class="progress memory-usage">
+                                <div class="progress-bar" role="progressbar" style="width: ${memoryPercentage}%;" 
+                                    aria-valuenow="${memoryPercentage}" aria-valuemin="0" aria-valuemax="100">
+                                    ${memoryPercentage}%
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // 添加錯誤資訊（如果有）
+                if (service.details.error) {
+                    detailsHtml += `<div class="alert alert-danger mt-2 mb-0 py-2 small">${service.details.error}</div>`;
+                }
+                
+                // 添加其他詳細資訊
+                for (const [key, value] of Object.entries(service.details)) {
+                    if (key !== 'memoryUsage' && key !== 'error') {
+                        detailsHtml += `<div><small>${key}: ${formatValue(value)}</small></div>`;
+                    }
+                }
+                
+                detailsHtml += '</div>';
+            }
+            
+            return `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card">
+                        <div class="card-header ${statusClass} d-flex justify-content-between align-items-center">
+                            ${service.name}
+                            <span class="badge ${statusBadgeClass}">${service.status}</span>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text mb-1">
+                                <small>URL: ${service.url}</small>
+                            </p>
+                            ${detailsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 更新系統資訊
+        function updateSystemInfo(systemInfo) {
+            if (!systemInfo) {
+                document.getElementById('systemInfoContainer').innerHTML = '<p class="text-center">無系統資訊可用</p>';
+                return;
+            }
+            
+            let html = '<div class="row">';
+            
+            // 基本系統資訊
+            html += `
+                <div class="col-md-6">
+                    <h6>系統</h6>
+                    <ul class="list-unstyled">
+                        <li>主機名稱: ${systemInfo.machineName}</li>
+                        <li>作業系統: ${systemInfo.osVersion}</li>
+                        <li>處理器數量: ${systemInfo.processorCount}</li>
+                    </ul>
+                </div>
+            `;
+            
+            // 處理程序資訊
+            if (systemInfo.process) {
+                html += `
+                    <div class="col-md-6">
+                        <h6>處理程序</h6>
+                        <ul class="list-unstyled">
+                            <li>處理程序ID: ${systemInfo.process.id}</li>
+                            <li>啟動時間: ${formatDateTime(new Date(systemInfo.process.startTime))}</li>
+                            <li>運行時間: ${systemInfo.process.uptime}</li>
+                            <li>執行緒數量: ${systemInfo.process.threadCount}</li>
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            // 記憶體資訊
+            if (systemInfo.memory) {
+                const totalMemoryMB = systemInfo.memory.totalMemoryMB || 0;
+                const managedMemoryMB = systemInfo.memory.managedMemoryMB || 0;
+                const memoryPercentage = Math.min(100, Math.round((managedMemoryMB / totalMemoryMB) * 100)) || 0;
+                
+                html += `
+                    <div class="col-md-12 mt-3">
+                        <h6>記憶體使用</h6>
+                        <div class="mb-2">
+                            <div>總記憶體: ${totalMemoryMB} MB</div>
+                            <div>受管理記憶體: ${managedMemoryMB} MB</div>
+                            <div class="progress mt-2">
+                                <div class="progress-bar" role="progressbar" style="width: ${memoryPercentage}%;" 
+                                    aria-valuenow="${memoryPercentage}" aria-valuemin="0" aria-valuemax="100">
+                                    ${memoryPercentage}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            document.getElementById('systemInfoContainer').innerHTML = html;
+        }
+        
+        // 顯示錯誤
+        function showError(message) {
+            const container = document.getElementById('servicesContainer');
+            container.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-danger">
+                        <strong>錯誤:</strong> ${message}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('overallStatus').textContent = '錯誤';
+            document.getElementById('overallStatus').className = 'badge bg-danger';
+            
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = `最後更新時間: ${formatDateTime(now)} (失敗)`;
+        }
+        
+        // 格式化日期時間
+        function formatDateTime(date) {
+            return date.toLocaleString('zh-TW', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit',
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: false
+            });
+        }
+        
+        // 格式化值
+        function formatValue(value) {
+            if (value === null || value === undefined) {
+                return '無';
+            }
+            if (typeof value === 'object') {
+                return JSON.stringify(value);
+            }
+            return value;
+        }
+        
+        // 獲取狀態對應的CSS類
+        function getStatusClass(status) {
+            status = status.toLowerCase();
+            if (status === 'healthy') return 'status-healthy';
+            if (status === 'unhealthy') return 'status-unhealthy';
+            if (status === 'degraded') return 'status-degraded';
+            return 'status-unknown';
+        }
+        
+        // 獲取狀態對應的徽章CSS類
+        function getStatusBadgeClass(status) {
+            status = status.toLowerCase();
+            if (status === 'healthy') return 'bg-success';
+            if (status === 'unhealthy') return 'bg-danger';
+            if (status === 'degraded') return 'bg-warning';
+            return 'bg-secondary';
+        }
+    </script>
+</body>
+</html>

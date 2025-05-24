@@ -9,6 +9,7 @@ using PaymentService.Services;
 using System;
 using System.IO;
 using System.Reflection;
+using Shared.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +66,49 @@ builder.Services.AddCors(options =>
     });
 });
 
+// 添加健康檢查
+builder.Services.AddBasicHealthChecks("PaymentService")
+    .AddNpgsql(builder.Configuration.GetConnectionString("DefaultConnection") ?? "")
+    .AddExternalService("OrderService", new Uri(builder.Configuration["ServiceUrls:OrderService"] ?? "http://order-service/health"))
+    .AddCheck("PaymentProcessors", () => 
+    {
+        try
+        {
+            // 檢查支付處理器是否正常運作
+            var serviceProvider = builder.Services.BuildServiceProvider();
+            var mockPaymentService = serviceProvider.GetRequiredService<IMockPaymentService>();
+            
+            // 這裡可以添加更多具體的檢查邏輯
+            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("支付處理服務運作正常");
+        }
+        catch (Exception ex)
+        {
+            return new Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult(
+                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                "支付處理服務檢查失敗",
+                ex);
+        }
+    }, new[] { "service", "payment-processing" })
+    .AddCheck("RefundService", () => 
+    {
+        try
+        {
+            // 檢查退款服務是否正常運作
+            var serviceProvider = builder.Services.BuildServiceProvider();
+            var refundService = serviceProvider.GetRequiredService<IRefundService>();
+            
+            // 這裡可以添加更多具體的檢查邏輯
+            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("退款服務運作正常");
+        }
+        catch (Exception ex)
+        {
+            return new Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult(
+                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                "退款服務檢查失敗",
+                ex);
+        }
+    }, new[] { "service", "refund-processing" });
+
 var app = builder.Build();
 
 // 配置 HTTP 請求管道
@@ -82,6 +126,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthorization();
+
+// 啟用健康檢查端點
+app.UseHealthChecks();
+
 app.MapControllers();
 
 // 在開發環境中自動執行遷移

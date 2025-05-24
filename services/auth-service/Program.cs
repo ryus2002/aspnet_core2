@@ -5,6 +5,7 @@ using System.Text;
 using System.Reflection;
 using AuthService.Middleware;
 using AuthService.Services;
+using Shared.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,6 +88,38 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// 添加健康檢查
+builder.Services.AddBasicHealthChecks("AuthService")
+    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? "")
+    .AddCheck("TokenService", () => 
+    {
+        try
+        {
+            // 檢查JWT服務配置是否正確
+            var jwtSecret = builder.Configuration["Jwt:Secret"];
+            var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+            var jwtAudience = builder.Configuration["Jwt:Audience"];
+            
+            if (string.IsNullOrEmpty(jwtSecret) || 
+                string.IsNullOrEmpty(jwtIssuer) || 
+                string.IsNullOrEmpty(jwtAudience))
+            {
+                return new Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult(
+                    Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded,
+                    "JWT配置不完整");
+            }
+            
+            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("JWT服務配置正確");
+        }
+        catch (Exception ex)
+        {
+            return new Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult(
+                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                "JWT服務檢查失敗",
+                ex);
+        }
+    }, new[] { "service", "security" });
+
 var app = builder.Build();
 
 // 配置 HTTP 請求管道
@@ -106,6 +139,9 @@ app.UseAuthorization();
 
 // 在管道中添加授權中間件
 app.UseMiddleware<AuthorizationMiddleware>();
+
+// 啟用健康檢查端點
+app.UseHealthChecks();
 
 app.MapControllers();
 
