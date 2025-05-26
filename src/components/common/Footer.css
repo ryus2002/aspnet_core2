@@ -1,0 +1,122 @@
+/**
+ * 頁尾組件樣式
+ */
+.footer {
+  background-color: #333;
+  color: #fff;
+  padding-top: 50px;
+  margin-top: 50px;
+}
+
+.footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-section {
+  flex: 1 1 250px;
+  margin-bottom: 30px;
+  padding-right: 20px;
+}
+
+.footer-title {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.footer-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 2px;
+  background-color: #1890ff;
+}
+
+.footer-text {
+  line-height: 1.6;
+  color: #ccc;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 10px;
+}
+
+.footer-links a {
+  color: #ccc;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-links a:hover {
+  color: #1890ff;
+}
+
+.footer-contact {
+  font-style: normal;
+  color: #ccc;
+  line-height: 1.6;
+}
+
+.footer-contact p {
+  margin-bottom: 10px;
+}
+
+.social-links {
+  display: flex;
+  margin-top: 20px;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: #444;
+  color: #fff;
+  border-radius: 50%;
+  margin-right: 10px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.social-link:hover {
+  background-color: #1890ff;
+}
+
+.footer-bottom {
+  background-color: #222;
+  padding: 15px 0;
+  text-align: center;
+  margin-top: 30px;
+}
+
+.copyright {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+  }
+  
+  .footer-section {
+    margin-bottom: 20px;
+  }
+}

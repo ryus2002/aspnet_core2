@@ -1,130 +1,78 @@
-using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
-using ProductService.Data;
-using ProductService.Services;
-using ProductService.Settings;
-using ProductService.Messaging.Publishers;
+using Shared.Monitoring;
 using Shared.Messaging;
-using System.Reflection;
-using ProductService.Messaging.Handlers;
 using Shared.Logging;
-using Shared.Logging.Middleware;
-using Shared.HealthChecks;
-
+using System;
 var builder = WebApplication.CreateBuilder(args);
-
-// 添加統一日誌系統
-builder.Services.AddUnifiedLogging(builder.Configuration, "product-service");
-
-// 添加日誌查看工具
-builder.Services.AddLogViewer();
 
 // 添加服務到容器
 builder.Services.AddControllers();
+
+// 添加 Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options => {
-    options.EnableAnnotations(); // 啟用 Swagger 註解
-});
+builder.Services.AddSwaggerGen();
+// 添加 MongoDB 設定
+var mongoDbSettings = builder.Configuration.GetSection("MongoDb").Get<MongoDbSettings>();
+builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoDbSettings.ConnectionString));
+builder.Services.AddSingleton<IMongoDatabase>(sp => 
+    sp.GetRequiredService<IMongoClient>().GetDatabase(mongoDbSettings.DatabaseName));
 
-// 配置 MongoDB 設定
-builder.Services.Configure<MongoDbSettings>(
-    builder.Configuration.GetSection("MongoDB"));
-
-// 註冊 MongoDB 資料庫上下文
-builder.Services.AddSingleton<IProductDbContext, ProductDbContext>();
-
-// 註冊服務
-builder.Services.AddScoped<IProductService, ProductService.Services.ProductService>();
+// 添加服務註冊
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 
-// 註冊消息處理器
-builder.Services.AddScoped<OrderCreatedHandler>();
+// 註冊庫存預警服務
+builder.Services.AddScoped<IInventoryAlertService, InventoryAlertService>();
 
-// 註冊消息發布器
-builder.Services.AddScoped<InventoryEventPublisher>();
+// 註冊庫存監控背景服務
+builder.Services.AddHostedService<InventoryMonitoringService>();
 
-// 註冊消息總線
-builder.Services.AddSingleton<IMessageBus>(sp => {
-    var logger = sp.GetRequiredService<ILogger<RabbitMQMessageBus>>();
-    var configuration = builder.Configuration;
-    var rabbitMQSettings = configuration.GetSection("RabbitMQ");
-    var host = rabbitMQSettings["Host"] ?? "localhost";
-    var port = int.Parse(rabbitMQSettings["Port"] ?? "5672");
-    var username = rabbitMQSettings["Username"] ?? "guest";
-    var password = rabbitMQSettings["Password"] ?? "guest";
-    
-    var connectionString = $"amqp://{username}:{password}@{host}:{port}";
-    return new RabbitMQMessageBus(connectionString, logger);
-});
+// 添加訊息總線
+builder.Services.AddMessageBus(builder.Configuration);
 
-// 添加健康檢查
-builder.Services.AddBasicHealthChecks("ProductService")
-    .AddMongoDB(builder.Configuration.GetSection("MongoDB:ConnectionString").Value ?? "mongodb://localhost:27017")
-    .AddRabbitMQ($"amqp://{builder.Configuration["RabbitMQ:Username"] ?? "guest"}:{builder.Configuration["RabbitMQ:Password"] ?? "guest"}@{builder.Configuration["RabbitMQ:Host"] ?? "localhost"}:{builder.Configuration["RabbitMQ:Port"] ?? "5672"}")
-    .AddCheck("InventoryService", () => 
-    {
-        try
-        {
-            // 檢查庫存服務是否正常運作
-            var serviceProvider = builder.Services.BuildServiceProvider();
-            var inventoryService = serviceProvider.GetRequiredService<IInventoryService>();
-            
-            // 這裡可以添加更多具體的檢查邏輯
-            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("庫存服務運作正常");
-        }
-        catch (Exception ex)
-        {
-            return new Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult(
-                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
-                "庫存服務檢查失敗",
-                ex);
-        }
-    }, new[] { "service", "inventory" });
+// 添加統一日誌
+builder.Services.AddUnifiedLogging(builder.Configuration);
+
+// 添加指標監控
+builder.Services.AddMetricsMonitoring(builder.Configuration, "product-service");
+
+// 添加監控儀表板
+builder.Services.AddMonitoringDashboard();
 
 var app = builder.Build();
 
-// 配置HTTP請求管道
-
-// 添加全局異常處理中間件
-app.UseGlobalExceptionHandling(app.Environment.IsDevelopment());
-
-// 添加請求日誌中間件
-app.UseRequestLogging();
-
+// 配置 HTTP 請求管道
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// 使用全局異常處理
+app.UseGlobalExceptionHandling();
+
+// 使用請求日誌
+app.UseRequestLogging();
+
+// 使用指標監控
+app.UseMetricsMonitoring();
+
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
-// 啟用健康檢查端點
-app.UseHealthChecks();
-
 app.MapControllers();
 
-// 啟用日誌查看工具
-app.UseLogViewer();
+// 啟動消息處理器
+app.Services.StartMessageHandlers();
 
-// 註冊消息處理器
-var messageBus = app.Services.GetRequiredService<IMessageBus>();
-var serviceProvider = app.Services;
+app.Run();
 
-// 手動註冊訂單創建處理器
-using (var scope = serviceProvider.CreateScope())
+// 為了讓 BusinessMetricsCollector 能夠使用
+public class MongoDbSettings
 {
-    var handler = scope.ServiceProvider.GetRequiredService<OrderCreatedHandler>();
-    // 添加 await 關鍵字以解決 CS4014 警告
-    await messageBus.SubscribeAsync<OrderCreatedMessage>(
-        "ecommerce",
-        "product-service.orders.created",
-        "order.created",
-        message => handler.HandleAsync(message));
+    public string ConnectionString { get; set; } = string.Empty;
+    public string DatabaseName { get; set; } = string.Empty;
 }
-
-// 使用 await 運行應用
-await app.RunAsync();

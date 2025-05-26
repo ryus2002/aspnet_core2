@@ -1,5 +1,9 @@
 # 微服務電商平台技術架構手冊
 
+## 系統概述
+
+本文檔提供微服務電商平台的技術架構概覽。完整的系統架構設計請參閱 [系統架構文檔](system-architecture.md)。
+
 ## 系統全景圖
 ```mermaid
 graph LR
@@ -49,6 +53,9 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 ---
 
 ### 2. 服務通訊機制
+
+> 注意：完整的服務通訊機制決策請參閱 [ADR-0003](adr/0003-service-communication-mechanism.md)
+
 **gRPC效能優化配置**：
 ```proto
 syntax = "proto3";
@@ -100,6 +107,9 @@ circuit_breaker_state{service="payment",state="HalfOpen"} 0
 ---
 
 ### 4. 分散式日誌架構
+
+> 注意：完整的日誌系統設計請參閱 [日誌系統文檔](logging-system.md)
+
 **Serilog+ELK整合範例**：
 ```csharp
 Log.Logger = new LoggerConfiguration()
@@ -203,4 +213,3 @@ graph TD
      -t http://api-gateway:8080 \
      -g gen.conf -r testreport.html
    ```
-

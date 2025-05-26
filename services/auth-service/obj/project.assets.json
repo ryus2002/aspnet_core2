@@ -4189,11 +4189,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "e:\\code\\net\\project1\\services\\auth-service\\auth-service.csproj",
+      "projectUniqueName": "E:\\code\\net\\project1\\services\\auth-service\\auth-service.csproj",
       "projectName": "auth-service",
-      "projectPath": "e:\\code\\net\\project1\\services\\auth-service\\auth-service.csproj",
+      "projectPath": "E:\\code\\net\\project1\\services\\auth-service\\auth-service.csproj",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "e:\\code\\net\\project1\\services\\auth-service\\obj\\",
+      "outputPath": "E:\\code\\net\\project1\\services\\auth-service\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -4275,7 +4275,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.409/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.410/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

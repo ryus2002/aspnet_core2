@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using ProductService.Models;
-using Shared.Messaging.MessageBus;
-using Shared.Messaging.Messages;
+using Shared.Messaging;
 
 namespace ProductService.Messaging.Publishers
 {
@@ -50,10 +49,10 @@ namespace ProductService.Messaging.Publishers
                     Sender = "product-service"
                 };
 
-                await _messageBus.PublishAsync(message);
+                await _messageBus.PublishAsync(message, "ecommerce", "inventory.updated");
 
                 _logger.LogInformation("庫存更新事件已發布: ProductId={ProductId}, MessageId={MessageId}", 
-                    inventoryChange.ProductId, message.MessageId);
+                    inventoryChange.ProductId, message.Id);
             }
             catch (Exception ex)
             {
@@ -88,10 +87,10 @@ namespace ProductService.Messaging.Publishers
                     Sender = "product-service"
                 };
 
-                await _messageBus.PublishAsync(message);
+                await _messageBus.PublishAsync(message, "ecommerce", "inventory.low");
 
                 _logger.LogInformation("庫存不足事件已發布: ProductId={ProductId}, MessageId={MessageId}", 
-                    productId, message.MessageId);
+                    productId, message.Id);
             }
             catch (Exception ex)
             {
@@ -133,10 +132,10 @@ namespace ProductService.Messaging.Publishers
                     });
                 }
 
-                await _messageBus.PublishAsync(message);
+                await _messageBus.PublishAsync(message, "ecommerce", "inventory.reserved");
 
                 _logger.LogInformation("庫存預留事件已發布: ReservationId={ReservationId}, MessageId={MessageId}", 
-                    reservation.Id, message.MessageId);
+                    reservation.Id, message.Id);
             }
             catch (Exception ex)
             {
@@ -144,5 +143,57 @@ namespace ProductService.Messaging.Publishers
                 throw;
             }
         }
+    }
+
+    /// <summary>
+    /// 庫存更新消息
+    /// </summary>
+    public class InventoryUpdatedMessage : BaseMessage
+    {
+        public string ProductId { get; set; } = null!;
+        public string? VariantId { get; set; }
+        public string ProductName { get; set; } = null!;
+        public int NewQuantity { get; set; }
+        public int QuantityChange { get; set; }
+        public string Reason { get; set; } = null!;
+        public string? ReferenceId { get; set; }
+        public string? UserId { get; set; }
+        public string Sender { get; set; } = null!;
+    }
+
+    /// <summary>
+    /// 庫存不足消息
+    /// </summary>
+    public class InventoryLowMessage : BaseMessage
+    {
+        public string ProductId { get; set; } = null!;
+        public string? VariantId { get; set; }
+        public string ProductName { get; set; } = null!;
+        public int CurrentQuantity { get; set; }
+        public int Threshold { get; set; }
+        public string Sender { get; set; } = null!;
+    }
+
+    /// <summary>
+    /// 庫存預留消息
+    /// </summary>
+    public class InventoryReservedMessage : BaseMessage
+    {
+        public string ReservationId { get; set; } = null!;
+        public string OwnerId { get; set; } = null!;
+        public string OwnerType { get; set; } = null!;
+        public DateTime ExpiresAt { get; set; }
+        public string Sender { get; set; } = null!;
+        public List<ReservationItemMessage> Items { get; set; } = new List<ReservationItemMessage>();
+    }
+
+    /// <summary>
+    /// 預留項目消息
+    /// </summary>
+    public class ReservationItemMessage
+    {
+        public string ProductId { get; set; } = null!;
+        public string? VariantId { get; set; }
+        public int Quantity { get; set; }
     }
 }

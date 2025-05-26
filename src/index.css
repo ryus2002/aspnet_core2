@@ -1,0 +1,56 @@
+/**
+ * 全域CSS樣式
+ * 定義基本的樣式重置和通用樣式
+ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: #1890ff;
+}
+
+a:hover {
+  color: #40a9ff;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.page-title {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  width: 100%;
+}
+
+/* 響應式設計的基本斷點 */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+}

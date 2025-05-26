@@ -1,0 +1,23 @@
+/**
+ * 應用程式主要樣式
+ * 定義應用程式的全局佈局和主要元素樣式
+ */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px 0;
+  margin-top: 60px; /* 為固定的頂部導航留出空間 */
+}
+
+/* 響應式設計調整 */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 15px 0;
+    margin-top: 50px;
+  }
+}

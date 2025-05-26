@@ -1,0 +1,111 @@
+/* 用戶個人中心樣式 */
+.user-profile-container {
+  min-height: 70vh;
+}
+
+/* 側邊欄樣式 */
+.profile-sidebar {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  height: 100%;
+}
+
+/* 用戶頭像樣式 */
+.user-avatar-container {
+  padding: 15px 0;
+}
+
+.user-avatar img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* 導航菜單樣式 */
+.profile-nav {
+  margin-top: 10px;
+}
+
+.profile-nav-link {
+  color: #495057;
+  font-weight: 500;
+  padding: 12px 15px;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  transition: all 0.3s ease;
+}
+
+.profile-nav-link:hover {
+  background-color: #e9ecef;
+}
+
+.profile-nav-link.active {
+  background-color: #007bff;
+  color: white;
+}
+
+/* 內容區域樣式 */
+.profile-content {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 25px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  min-height: 500px;
+}
+
+/* 表單樣式 */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-weight: 500;
+}
+
+/* 訂單卡片樣式 */
+.order-card {
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-3px);
+}
+
+/* 地址卡片樣式 */
+.address-card {
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.address-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.default-address-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* 按鈕樣式 */
+.btn-add-address {
+  margin-bottom: 20px;
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+  .profile-sidebar {
+    margin-bottom: 20px;
+  }
+  
+  .user-avatar img {
+    width: 100px;
+    height: 100px;
+  }
+}

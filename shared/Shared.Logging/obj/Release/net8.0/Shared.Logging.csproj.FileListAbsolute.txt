@@ -1,0 +1,13 @@
+E:\code\net\project1\shared\Shared.Logging\bin\Release\net8.0\Shared.Logging.deps.json
+E:\code\net\project1\shared\Shared.Logging\bin\Release\net8.0\Shared.Logging.dll
+E:\code\net\project1\shared\Shared.Logging\bin\Release\net8.0\Shared.Logging.pdb
+E:\code\net\project1\shared\Shared.Logging\obj\Release\net8.0\Shared.Logging.csproj.AssemblyReference.cache
+E:\code\net\project1\shared\Shared.Logging\obj\Release\net8.0\Shared.Logging.GeneratedMSBuildEditorConfig.editorconfig
+E:\code\net\project1\shared\Shared.Logging\obj\Release\net8.0\Shared.Logging.AssemblyInfoInputs.cache
+E:\code\net\project1\shared\Shared.Logging\obj\Release\net8.0\Shared.Logging.AssemblyInfo.cs
+E:\code\net\project1\shared\Shared.Logging\obj\Release\net8.0\Shared.Logging.csproj.CoreCompileInputs.cache
+E:\code\net\project1\shared\Shared.Logging\obj\Release\net8.0\Shared.Logging.sourcelink.json
+E:\code\net\project1\shared\Shared.Logging\obj\Release\net8.0\Shared.Logging.dll
+E:\code\net\project1\shared\Shared.Logging\obj\Release\net8.0\refint\Shared.Logging.dll
+E:\code\net\project1\shared\Shared.Logging\obj\Release\net8.0\Shared.Logging.pdb
+E:\code\net\project1\shared\Shared.Logging\obj\Release\net8.0\ref\Shared.Logging.dll

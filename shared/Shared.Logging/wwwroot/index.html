@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日誌查看工具</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .log-level-verbose { color: #6c757d; }
+        .log-level-debug { color: #17a2b8; }
+        .log-level-information { color: #28a745; }
+        .log-level-warning { color: #ffc107; }
+        .log-level-error { color: #dc3545; }
+        .log-level-fatal { color: #7e0000; font-weight: bold; }
+        .log-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .chart-container {
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">日誌查看工具</h1>
+        
+        <ul class="nav nav-tabs mb-3" id="logTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button" role="tab" aria-controls="search" aria-selected="true">搜索日誌</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab" aria-controls="files" aria-selected="false">日誌文件</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="statistics-tab" data-bs-toggle="tab" data-bs-target="#statistics" type="button" role="tab" aria-controls="statistics" aria-selected="false">統計分析</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="logTabsContent">
+            <!-- 搜索日誌頁籤 -->
+            <div class="tab-pane fade show active" id="search" role="tabpanel" aria-labelledby="search-tab">
+                <div class="card mb-3">
+                    <div class="card-header">搜索條件</div>
+                    <div class="card-body">
+                        <form id="searchForm">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="serviceName" class="form-label">服務名稱</label>
+                                    <input type="text" class="form-control" id="serviceName" placeholder="所有服務">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="level" class="form-label">日誌級別</label>
+                                    <select class="form-select" id="level">
+                                        <option value="" selected>所有級別</option>
+                                        <option value="Verbose">Verbose</option>
+                                        <option value="Debug">Debug</option>
+                                        <option value="Information">Information</option>
+                                        <option value="Warning">Warning</option>
+                                        <option value="Error">Error</option>
+                                        <option value="Fatal">Fatal</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="searchText" class="form-label">搜索文本</label>
+                                    <input type="text" class="form-control" id="searchText" placeholder="輸入關鍵字">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="startTime" class="form-label">開始時間</label>
+                                    <input type="datetime-local" class="form-control" id="startTime">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="endTime" class="form-label">結束時間</label>
+                                    <input type="datetime-local" class="form-control" id="endTime">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">搜索</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>搜索結果</span>
+                        <div>
+                            <button id="prevPage" class="btn btn-sm btn-outline-secondary" disabled>上一頁</button>
+                            <span id="pageInfo" class="mx-2">第 1 頁</span>
+                            <button id="nextPage" class="btn btn-sm btn-outline-secondary">下一頁</button>
+                        </div>
+                    </div>
+                    <div class="card-body log-container">
+                        <div id="searchResults" class="list-group">
+                            <div class="text-center text-muted">請使用上方的表單搜索日誌</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 日誌文件頁籤 -->
+            <div class="tab-pane fade" id="files" role="tabpanel" aria-labelledby="files-tab">
+                <div class="card mb-3">
+                    <div class="card-header">日誌文件列表</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="fileServiceName" class="form-label">服務名稱</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="fileServiceName" placeholder="所有服務">
+                                <button class="btn btn-primary" id="refreshFiles">刷新</button>
+                            </div>
+                        </div>
+                        <div id="filesList" class="list-group">
+                            <div class="text-center text-muted">載入中...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">文件內容</div>
+                    <div class="card-body log-container">
+                        <div id="fileContent" class="list-group">
+                            <div class="text-center text-muted">請從上方列表選擇一個日誌文件</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 統計分析頁籤 -->
+            <div class="tab-pane fade" id="statistics" role="tabpanel" aria-labelledby="statistics-tab">
+                <div class="card mb-3">
+                    <div class="card-header">統計條件</div>
+                    <div class="card-body">
+                        <form id="statisticsForm">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="statsServiceName" class="form-label">服務名稱</label>
+                                    <input type="text" class="form-control" id="statsServiceName" placeholder="所有服務">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="statsStartTime" class="form-label">開始時間</label>
+                                    <input type="datetime-local" class="form-control" id="statsStartTime">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="statsEndTime" class="form-label">結束時間</label>
+                                    <input type="datetime-local" class="form-control" id="statsEndTime">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">分析</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header">按日誌級別統計</div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="levelChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header">按服務名稱統計</div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="serviceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <div class="card">
+                            <div class="card-header">按時間統計</div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="timeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-header">最常見的錯誤</div>
+                            <div class="card-body">
+                                <ul id="commonErrors" class="list-group">
+                                    <li class="list-group-item text-center text-muted">無數據</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-header">最慢的請求</div>
+                            <div class="card-body">
+                                <ul id="slowestRequests" class="list-group">
+                                    <li class="list-group-item text-center text-muted">無數據</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 日誌詳情模態框 -->
+    <div class="modal fade" id="logDetailModal" tabindex="-1" aria-labelledby="logDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logDetailModalLabel">日誌詳情</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="logDetail"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.0/dist/chart.umd.min.js"></script>
+    <script src="js/logs.js"></script>
+</body>
+</html>

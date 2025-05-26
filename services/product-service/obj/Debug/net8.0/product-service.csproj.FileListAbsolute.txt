@@ -64,3 +64,9 @@ E:\code\net\project1\services\product-service\obj\Debug\net8.0\refint\product-se
 E:\code\net\project1\services\product-service\obj\Debug\net8.0\product-service.pdb
 E:\code\net\project1\services\product-service\obj\Debug\net8.0\product-service.genruntimeconfig.cache
 E:\code\net\project1\services\product-service\obj\Debug\net8.0\ref\product-service.dll
+E:\code\net\project1\services\product-service\bin\Debug\net8.0\product-service.xml
+E:\code\net\project1\services\product-service\bin\Debug\net8.0\RabbitMQ.Client.dll
+E:\code\net\project1\services\product-service\bin\Debug\net8.0\Swashbuckle.AspNetCore.Annotations.dll
+E:\code\net\project1\services\product-service\bin\Debug\net8.0\Shared.Messaging.dll
+E:\code\net\project1\services\product-service\bin\Debug\net8.0\Shared.Messaging.pdb
+E:\code\net\project1\services\product-service\obj\Debug\net8.0\product-service.xml

@@ -1,0 +1,1855 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>product-service</name>
+    </assembly>
+    <members>
+        <member name="T:ProductService.Controllers.CategoryController">
+            <summary>
+            分類控制器
+            </summary>
+        </member>
+        <member name="M:ProductService.Controllers.CategoryController.#ctor(ProductService.Services.ICategoryService,Microsoft.Extensions.Logging.ILogger{ProductService.Controllers.CategoryController})">
+            <summary>
+            構造函數
+            </summary>
+            <param name="categoryService">分類服務</param>
+            <param name="logger">日誌記錄器</param>
+        </member>
+        <member name="M:ProductService.Controllers.CategoryController.CreateCategory(ProductService.DTOs.CreateCategoryRequest)">
+            <summary>
+            創建分類
+            </summary>
+            <param name="request">創建分類請求</param>
+            <returns>創建的分類</returns>
+        </member>
+        <member name="M:ProductService.Controllers.CategoryController.UpdateCategory(System.String,ProductService.DTOs.UpdateCategoryRequest)">
+            <summary>
+            更新分類
+            </summary>
+            <param name="id">分類ID</param>
+            <param name="request">更新分類請求</param>
+            <returns>更新後的分類</returns>
+        </member>
+        <member name="M:ProductService.Controllers.CategoryController.GetCategory(System.String)">
+            <summary>
+            獲取分類
+            </summary>
+            <param name="id">分類ID</param>
+            <returns>分類</returns>
+        </member>
+        <member name="M:ProductService.Controllers.CategoryController.GetCategoryBySlug(System.String)">
+            <summary>
+            根據Slug獲取分類
+            </summary>
+            <param name="slug">Slug</param>
+            <returns>分類</returns>
+        </member>
+        <member name="M:ProductService.Controllers.CategoryController.DeleteCategory(System.String)">
+            <summary>
+            刪除分類
+            </summary>
+            <param name="id">分類ID</param>
+            <returns>操作結果</returns>
+        </member>
+        <member name="M:ProductService.Controllers.CategoryController.GetAllCategories(System.Boolean)">
+            <summary>
+            獲取所有分類
+            </summary>
+            <param name="includeInactive">是否包含未啟用的分類</param>
+            <returns>分類列表</returns>
+        </member>
+        <member name="M:ProductService.Controllers.CategoryController.GetChildCategories(System.String,System.Boolean)">
+            <summary>
+            獲取子分類
+            </summary>
+            <param name="parentId">父分類ID</param>
+            <param name="includeInactive">是否包含未啟用的分類</param>
+            <returns>子分類列表</returns>
+        </member>
+        <member name="M:ProductService.Controllers.CategoryController.GetCategoryTree(System.Boolean)">
+            <summary>
+            獲取分類樹
+            </summary>
+            <param name="includeInactive">是否包含未啟用的分類</param>
+            <returns>分類樹</returns>
+        </member>
+        <member name="M:ProductService.Controllers.ProductController.GetProducts(System.Int32,System.Int32,System.String,System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.String,System.String)">
+            <summary>
+            獲取所有商品
+            </summary>
+            <remarks>
+            獲取所有商品的列表，支持分頁、排序和過濾
+            </remarks>
+            <param name="page">頁碼，默認為1</param>
+            <param name="pageSize">每頁項目數，默認為10</param>
+            <param name="categoryId">按類別ID過濾</param>
+            <param name="minPrice">最低價格過濾</param>
+            <param name="maxPrice">最高價格過濾</param>
+            <param name="sortBy">排序字段，如"price"、"name"等，默認為"createdAt"</param>
+            <param name="sortDirection">排序方向，"asc"或"desc"，默認為"desc"</param>
+            <returns>分頁商品列表</returns>
+            <response code="200">成功</response>
+            <response code="400">請求參數無效</response>
+        </member>
+        <member name="M:ProductService.Controllers.ProductController.GetProduct(System.String)">
+            <summary>
+            獲取單個商品
+            </summary>
+            <remarks>
+            通過ID獲取特定商品的詳細信息
+            </remarks>
+            <param name="id">商品ID</param>
+            <returns>商品詳細信息</returns>
+            <response code="200">成功</response>
+            <response code="404">商品不存在</response>
+        </member>
+        <member name="M:ProductService.Controllers.ProductController.GetProductStock(System.String,System.String)">
+            <summary>
+            獲取商品庫存
+            </summary>
+            <remarks>
+            獲取指定商品的庫存信息
+            </remarks>
+            <param name="id">商品ID</param>
+            <param name="variantId">變體ID</param>
+            <returns>庫存信息</returns>
+            <response code="200">成功</response>
+            <response code="404">商品不存在</response>
+        </member>
+        <member name="M:ProductService.Controllers.ProductController.SearchProducts(System.String,System.Int32,System.Int32,System.String,System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.String,System.String)">
+            <summary>
+            搜索商品
+            </summary>
+            <remarks>
+            根據關鍵詞搜索商品
+            </remarks>
+            <param name="keyword">搜索關鍵詞</param>
+            <param name="page">頁碼，默認為1</param>
+            <param name="pageSize">每頁項目數，默認為10</param>
+            <param name="categoryId">按類別ID過濾</param>
+            <param name="minPrice">最低價格過濾</param>
+            <param name="maxPrice">最高價格過濾</param>
+            <param name="sortBy">排序字段，默認為"score"</param>
+            <param name="sortDirection">排序方向，"asc"或"desc"，默認為"desc"</param>
+            <returns>分頁商品列表</returns>
+            <response code="200">成功</response>
+            <response code="400">請求參數無效</response>
+        </member>
+        <member name="M:ProductService.Controllers.ProductController.CreateProduct(ProductService.DTOs.CreateProductRequest)">
+            <summary>
+            創建商品
+            </summary>
+            <remarks>
+            創建新商品。需要管理員權限。
+            </remarks>
+            <param name="request">創建商品請求</param>
+            <returns>創建的商品</returns>
+            <response code="201">商品創建成功</response>
+            <response code="400">請求參數無效</response>
+            <response code="401">未認證</response>
+            <response code="403">權限不足</response>
+        </member>
+        <member name="M:ProductService.Controllers.ProductController.UpdateProduct(System.String,ProductService.DTOs.UpdateProductRequest)">
+            <summary>
+            更新商品
+            </summary>
+            <remarks>
+            更新現有商品。需要管理員權限。
+            </remarks>
+            <param name="id">商品ID</param>
+            <param name="request">更新商品請求</param>
+            <returns>更新後的商品</returns>
+            <response code="200">商品更新成功</response>
+            <response code="400">請求參數無效</response>
+            <response code="401">未認證</response>
+            <response code="403">權限不足</response>
+            <response code="404">商品不存在</response>
+        </member>
+        <member name="M:ProductService.Controllers.ProductController.UpdateProductStock(System.String,ProductService.DTOs.UpdateStockRequest)">
+            <summary>
+            更新商品庫存
+            </summary>
+            <remarks>
+            更新指定商品的庫存數量。需要管理員權限。
+            </remarks>
+            <param name="id">商品ID</param>
+            <param name="request">庫存更新請求</param>
+            <returns>更新後的商品</returns>
+            <response code="200">庫存更新成功</response>
+            <response code="400">請求參數無效</response>
+            <response code="401">未認證</response>
+            <response code="403">權限不足</response>
+            <response code="404">商品不存在</response>
+        </member>
+        <member name="M:ProductService.Controllers.ProductController.DeleteProduct(System.String)">
+            <summary>
+            刪除商品
+            </summary>
+            <remarks>
+            刪除指定商品。需要管理員權限。
+            </remarks>
+            <param name="id">商品ID</param>
+            <returns>無內容</returns>
+            <response code="204">商品刪除成功</response>
+            <response code="401">未認證</response>
+            <response code="403">權限不足</response>
+            <response code="404">商品不存在</response>
+        </member>
+        <member name="T:ProductService.Data.IProductDbContext">
+            <summary>
+            商品服務數據庫上下文接口
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.IProductDbContext.Products">
+            <summary>
+            商品集合
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.IProductDbContext.Categories">
+            <summary>
+            分類集合
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.IProductDbContext.InventoryChanges">
+            <summary>
+            庫存變動記錄集合
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.IProductDbContext.Reservations">
+            <summary>
+            商品預留集合
+            </summary>
+        </member>
+        <member name="T:ProductService.Data.ProductDatabaseSettings">
+            <summary>
+            商品數據庫設定
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.ProductDatabaseSettings.ConnectionString">
+            <summary>
+            連接字符串
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.ProductDatabaseSettings.DatabaseName">
+            <summary>
+            數據庫名稱
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.ProductDatabaseSettings.ProductsCollectionName">
+            <summary>
+            商品集合名稱
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.ProductDatabaseSettings.CategoriesCollectionName">
+            <summary>
+            分類集合名稱
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.ProductDatabaseSettings.InventoryChangesCollectionName">
+            <summary>
+            庫存變動記錄集合名稱
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.ProductDatabaseSettings.ReservationsCollectionName">
+            <summary>
+            商品預留集合名稱
+            </summary>
+        </member>
+        <member name="T:ProductService.Data.ProductDbContext">
+            <summary>
+            商品服務數據庫上下文
+            </summary>
+        </member>
+        <member name="M:ProductService.Data.ProductDbContext.#ctor(Microsoft.Extensions.Options.IOptions{ProductService.Settings.MongoDbSettings})">
+            <summary>
+            構造函數
+            </summary>
+            <param name="settings">MongoDB設置</param>
+        </member>
+        <member name="P:ProductService.Data.ProductDbContext.Products">
+            <summary>
+            商品集合
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.ProductDbContext.Categories">
+            <summary>
+            分類集合
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.ProductDbContext.InventoryChanges">
+            <summary>
+            庫存變動記錄集合
+            </summary>
+        </member>
+        <member name="P:ProductService.Data.ProductDbContext.Reservations">
+            <summary>
+            商品預留集合
+            </summary>
+        </member>
+        <member name="M:ProductService.Data.ProductDbContext.EnsureIndexes">
+            <summary>
+            確保索引存在
+            </summary>
+        </member>
+        <member name="T:ProductService.DTOs.CreateCategoryRequest">
+            <summary>
+            創建分類請求
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateCategoryRequest.Name">
+            <summary>
+            分類名稱
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateCategoryRequest.Description">
+            <summary>
+            分類描述
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateCategoryRequest.Slug">
+            <summary>
+            URL友好的標識符
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateCategoryRequest.ParentId">
+            <summary>
+            父分類ID (頂級分類為null)
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateCategoryRequest.Status">
+            <summary>
+            分類狀態: active, inactive
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateCategoryRequest.SortOrder">
+            <summary>
+            排序順序
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateCategoryRequest.IsActive">
+            <summary>
+            是否啟用
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateCategoryRequest.Image">
+            <summary>
+            分類圖片
+            </summary>
+        </member>
+        <member name="T:ProductService.DTOs.UpdateCategoryRequest">
+            <summary>
+            更新分類請求
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateCategoryRequest.Name">
+            <summary>
+            分類名稱
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateCategoryRequest.Description">
+            <summary>
+            分類描述
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateCategoryRequest.Slug">
+            <summary>
+            URL友好的標識符
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateCategoryRequest.ParentId">
+            <summary>
+            父分類ID
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateCategoryRequest.Status">
+            <summary>
+            分類狀態: active, inactive
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateCategoryRequest.SortOrder">
+            <summary>
+            排序順序
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateCategoryRequest.IsActive">
+            <summary>
+            是否啟用
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateCategoryRequest.Image">
+            <summary>
+            分類圖片
+            </summary>
+        </member>
+        <member name="T:ProductService.DTOs.CategoryTreeNode">
+            <summary>
+            分類樹節點
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CategoryTreeNode.Id">
+            <summary>
+            分類ID
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CategoryTreeNode.Name">
+            <summary>
+            分類名稱
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CategoryTreeNode.Description">
+            <summary>
+            分類描述
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CategoryTreeNode.Slug">
+            <summary>
+            URL友好的標識符
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CategoryTreeNode.Level">
+            <summary>
+            分類層級
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CategoryTreeNode.Status">
+            <summary>
+            分類狀態: active, inactive
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CategoryTreeNode.SortOrder">
+            <summary>
+            排序順序
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CategoryTreeNode.IsActive">
+            <summary>
+            是否啟用
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CategoryTreeNode.Image">
+            <summary>
+            分類圖片
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CategoryTreeNode.Children">
+            <summary>
+            子分類
+            </summary>
+        </member>
+        <member name="T:ProductService.DTOs.CreateProductRequest">
+            <summary>
+            創建商品請求
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.Name">
+            <summary>
+            商品名稱
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.Description">
+            <summary>
+            商品描述
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.Price">
+            <summary>
+            正常價格
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.DiscountPrice">
+            <summary>
+            折扣價格
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.Currency">
+            <summary>
+            貨幣單位
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.Images">
+            <summary>
+            商品圖片
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.CategoryId">
+            <summary>
+            商品分類ID
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.Attributes">
+            <summary>
+            商品屬性
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.Variants">
+            <summary>
+            商品變體
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.StockQuantity">
+            <summary>
+            庫存數量
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.LowStockThreshold">
+            <summary>
+            低庫存閾值
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.Tags">
+            <summary>
+            商品標籤
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.Status">
+            <summary>
+            商品狀態
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateProductRequest.Metadata">
+            <summary>
+            商品元數據
+            </summary>
+        </member>
+        <member name="T:ProductService.DTOs.UpdateProductRequest">
+            <summary>
+            更新商品請求
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateProductRequest.Name">
+            <summary>
+            商品名稱
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateProductRequest.Description">
+            <summary>
+            商品描述
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateProductRequest.Price">
+            <summary>
+            正常價格
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateProductRequest.DiscountPrice">
+            <summary>
+            折扣價格
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateProductRequest.Currency">
+            <summary>
+            貨幣單位
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateProductRequest.Images">
+            <summary>
+            商品圖片
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateProductRequest.CategoryId">
+            <summary>
+            商品分類ID
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateProductRequest.Attributes">
+            <summary>
+            商品屬性
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateProductRequest.Variants">
+            <summary>
+            商品變體
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateProductRequest.Status">
+            <summary>
+            商品狀態
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateProductRequest.Tags">
+            <summary>
+            商品標籤
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateProductRequest.Metadata">
+            <summary>
+            商品元數據
+            </summary>
+        </member>
+        <member name="T:ProductService.DTOs.ProductMetadataDto">
+            <summary>
+            商品元數據DTO
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ProductMetadataDto.SearchKeywords">
+            <summary>
+            搜尋關鍵字
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ProductMetadataDto.SeoTitle">
+            <summary>
+            SEO標題
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ProductMetadataDto.SeoDescription">
+            <summary>
+            SEO描述
+            </summary>
+        </member>
+        <member name="T:ProductService.DTOs.ProductImageDto">
+            <summary>
+            商品圖片DTO
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ProductImageDto.Url">
+            <summary>
+            圖片URL
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ProductImageDto.Alt">
+            <summary>
+            替代文字
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ProductImageDto.IsMain">
+            <summary>
+            是否為主圖
+            </summary>
+        </member>
+        <member name="T:ProductService.DTOs.ProductVariantDto">
+            <summary>
+            商品變體DTO
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ProductVariantDto.VariantId">
+            <summary>
+            變體ID
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ProductVariantDto.Attributes">
+            <summary>
+            變體特定屬性
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ProductVariantDto.Price">
+            <summary>
+            變體價格
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ProductVariantDto.Sku">
+            <summary>
+            庫存單位
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ProductVariantDto.Stock">
+            <summary>
+            庫存數量
+            </summary>
+        </member>
+        <member name="T:ProductService.DTOs.UpdateStockRequest">
+            <summary>
+            商品庫存更新請求
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateStockRequest.Quantity">
+            <summary>
+            庫存數量
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateStockRequest.VariantId">
+            <summary>
+            變體ID (如果適用)
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateStockRequest.Reason">
+            <summary>
+            變動原因
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateStockRequest.ReferenceId">
+            <summary>
+            相關單據ID (如訂單ID)
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateStockRequest.UserId">
+            <summary>
+            操作用戶ID
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.UpdateStockRequest.LowStockThreshold">
+            <summary>
+            低庫存閾值
+            </summary>
+        </member>
+        <member name="T:ProductService.DTOs.CreateReservationRequest">
+            <summary>
+            商品預留請求
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateReservationRequest.OwnerId">
+            <summary>
+            擁有者ID (如用戶ID或購物車ID)
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateReservationRequest.OwnerType">
+            <summary>
+            擁有者類型 (user, cart, order等)
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateReservationRequest.Items">
+            <summary>
+            預留項目列表
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateReservationRequest.SessionId">
+            <summary>
+            會話ID
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateReservationRequest.UserId">
+            <summary>
+            用戶ID (可選)
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.CreateReservationRequest.ExpirationMinutes">
+            <summary>
+            預留過期分鐘數 (預設15分鐘)
+            </summary>
+        </member>
+        <member name="T:ProductService.DTOs.ReservationItemDto">
+            <summary>
+            預留項目DTO
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ReservationItemDto.ProductId">
+            <summary>
+            商品ID
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ReservationItemDto.VariantId">
+            <summary>
+            變體ID (如果適用)
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.ReservationItemDto.Quantity">
+            <summary>
+            預留數量
+            </summary>
+        </member>
+        <member name="T:ProductService.DTOs.PagedResponse`1">
+            <summary>
+            分頁響應
+            </summary>
+            <typeparam name="T">數據類型</typeparam>
+        </member>
+        <member name="P:ProductService.DTOs.PagedResponse`1.Page">
+            <summary>
+            當前頁碼
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.PagedResponse`1.PageSize">
+            <summary>
+            每頁大小
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.PagedResponse`1.TotalItems">
+            <summary>
+            總記錄數
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.PagedResponse`1.TotalPages">
+            <summary>
+            總頁數
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.PagedResponse`1.HasPrevious">
+            <summary>
+            是否有上一頁
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.PagedResponse`1.HasNext">
+            <summary>
+            是否有下一頁
+            </summary>
+        </member>
+        <member name="P:ProductService.DTOs.PagedResponse`1.Items">
+            <summary>
+            數據
+            </summary>
+        </member>
+        <member name="T:ProductService.Exceptions.BadRequestException">
+            <summary>
+            表示錯誤請求的異常
+            </summary>
+        </member>
+        <member name="M:ProductService.Exceptions.BadRequestException.#ctor">
+            <summary>
+            初始化 <see cref="T:ProductService.Exceptions.BadRequestException"/> 類的新實例
+            </summary>
+        </member>
+        <member name="M:ProductService.Exceptions.BadRequestException.#ctor(System.String)">
+            <summary>
+            使用指定的錯誤消息初始化 <see cref="T:ProductService.Exceptions.BadRequestException"/> 類的新實例
+            </summary>
+            <param name="message">描述錯誤的消息</param>
+        </member>
+        <member name="M:ProductService.Exceptions.BadRequestException.#ctor(System.String,System.Exception)">
+            <summary>
+            使用指定的錯誤消息和對作為此異常原因的內部異常的引用來初始化 <see cref="T:ProductService.Exceptions.BadRequestException"/> 類的新實例
+            </summary>
+            <param name="message">描述錯誤的消息</param>
+            <param name="innerException">導致當前異常的異常</param>
+        </member>
+        <member name="T:ProductService.Exceptions.NotFoundException">
+            <summary>
+            表示請求的資源未找到的異常
+            </summary>
+        </member>
+        <member name="M:ProductService.Exceptions.NotFoundException.#ctor">
+            <summary>
+            初始化 <see cref="T:ProductService.Exceptions.NotFoundException"/> 類的新實例
+            </summary>
+        </member>
+        <member name="M:ProductService.Exceptions.NotFoundException.#ctor(System.String)">
+            <summary>
+            使用指定的錯誤消息初始化 <see cref="T:ProductService.Exceptions.NotFoundException"/> 類的新實例
+            </summary>
+            <param name="message">描述錯誤的消息</param>
+        </member>
+        <member name="M:ProductService.Exceptions.NotFoundException.#ctor(System.String,System.Exception)">
+            <summary>
+            使用指定的錯誤消息和對作為此異常原因的內部異常的引用來初始化 <see cref="T:ProductService.Exceptions.NotFoundException"/> 類的新實例
+            </summary>
+            <param name="message">描述錯誤的消息</param>
+            <param name="innerException">導致當前異常的異常</param>
+        </member>
+        <member name="T:ProductService.Messaging.Handlers.OrderCreatedHandler">
+            <summary>
+            訂單創建事件處理器，用於處理訂單創建後的庫存更新
+            </summary>
+        </member>
+        <member name="M:ProductService.Messaging.Handlers.OrderCreatedHandler.#ctor(ProductService.Services.IInventoryService,ProductService.Services.IProductService,Microsoft.Extensions.Logging.ILogger{ProductService.Messaging.Handlers.OrderCreatedHandler})">
+            <summary>
+            構造函數
+            </summary>
+            <param name="inventoryService">庫存服務</param>
+            <param name="productService">商品服務</param>
+            <param name="logger">日誌記錄器</param>
+        </member>
+        <member name="M:ProductService.Messaging.Handlers.OrderCreatedHandler.HandleAsync(ProductService.Messaging.Handlers.OrderCreatedMessage)">
+            <summary>
+            處理訂單創建事件
+            </summary>
+            <param name="message">訂單創建消息</param>
+            <returns>異步任務</returns>
+        </member>
+        <member name="T:ProductService.Messaging.Handlers.IMessageHandler`1">
+            <summary>
+            消息處理器介面
+            </summary>
+            <typeparam name="T">消息類型</typeparam>
+        </member>
+        <member name="M:ProductService.Messaging.Handlers.IMessageHandler`1.HandleAsync(`0)">
+            <summary>
+            處理消息
+            </summary>
+            <param name="message">消息</param>
+            <returns>異步任務</returns>
+        </member>
+        <member name="T:ProductService.Messaging.Handlers.OrderCreatedMessage">
+            <summary>
+            訂單創建消息
+            </summary>
+        </member>
+        <member name="T:ProductService.Messaging.Handlers.OrderItemMessage">
+            <summary>
+            訂單項目消息
+            </summary>
+        </member>
+        <member name="T:ProductService.Messaging.Publishers.InventoryEventPublisher">
+            <summary>
+            庫存事件發布器，負責發送庫存相關事件
+            </summary>
+        </member>
+        <member name="M:ProductService.Messaging.Publishers.InventoryEventPublisher.#ctor(Shared.Messaging.IMessageBus,Microsoft.Extensions.Logging.ILogger{ProductService.Messaging.Publishers.InventoryEventPublisher})">
+            <summary>
+            構造函數
+            </summary>
+            <param name="messageBus">消息總線</param>
+            <param name="logger">日誌記錄器</param>
+        </member>
+        <member name="M:ProductService.Messaging.Publishers.InventoryEventPublisher.PublishInventoryUpdatedEventAsync(ProductService.Models.InventoryChange,System.String)">
+            <summary>
+            發布庫存更新事件
+            </summary>
+            <param name="inventoryChange">庫存變動記錄</param>
+            <param name="productName">商品名稱</param>
+            <returns>異步任務</returns>
+        </member>
+        <member name="M:ProductService.Messaging.Publishers.InventoryEventPublisher.PublishInventoryLowEventAsync(System.String,System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            發布庫存不足事件
+            </summary>
+            <param name="productId">商品ID</param>
+            <param name="variantId">變體ID</param>
+            <param name="productName">商品名稱</param>
+            <param name="currentQuantity">當前數量</param>
+            <param name="threshold">閾值</param>
+            <returns>異步任務</returns>
+        </member>
+        <member name="M:ProductService.Messaging.Publishers.InventoryEventPublisher.PublishInventoryReservedEventAsync(ProductService.Models.Reservation)">
+            <summary>
+            發布庫存預留事件
+            </summary>
+            <param name="reservation">預留記錄</param>
+            <returns>異步任務</returns>
+        </member>
+        <member name="T:ProductService.Messaging.Publishers.InventoryUpdatedMessage">
+            <summary>
+            庫存更新消息
+            </summary>
+        </member>
+        <member name="T:ProductService.Messaging.Publishers.InventoryLowMessage">
+            <summary>
+            庫存不足消息
+            </summary>
+        </member>
+        <member name="T:ProductService.Messaging.Publishers.InventoryReservedMessage">
+            <summary>
+            庫存預留消息
+            </summary>
+        </member>
+        <member name="T:ProductService.Messaging.Publishers.ReservationItemMessage">
+            <summary>
+            預留項目消息
+            </summary>
+        </member>
+        <member name="T:ProductService.Models.Category">
+            <summary>
+            商品分類模型，對應MongoDB中的categories集合
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.Id">
+            <summary>
+            分類唯一標識符
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.Name">
+            <summary>
+            分類名稱
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.Description">
+            <summary>
+            分類描述
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.Slug">
+            <summary>
+            URL友好的標識符
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.ParentId">
+            <summary>
+            父分類ID (頂級分類為null)
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.Level">
+            <summary>
+            分類層級 (0為頂級)
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.Path">
+            <summary>
+            從頂級到當前分類的路徑
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.Status">
+            <summary>
+            分類狀態: active, inactive
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.SortOrder">
+            <summary>
+            排序順序
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.IsActive">
+            <summary>
+            是否啟用
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.Image">
+            <summary>
+            分類圖片
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Category.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="T:ProductService.Models.CategoryImage">
+            <summary>
+            分類圖片
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.CategoryImage.Url">
+            <summary>
+            圖片URL
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.CategoryImage.Alt">
+            <summary>
+            替代文字
+            </summary>
+        </member>
+        <member name="T:ProductService.Models.InventoryChange">
+            <summary>
+            庫存變動記錄模型，對應MongoDB中的inventory_changes集合
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.InventoryChange.Id">
+            <summary>
+            記錄唯一標識符
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.InventoryChange.ProductId">
+            <summary>
+            商品ID
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.InventoryChange.VariantId">
+            <summary>
+            變體ID (如果適用)
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.InventoryChange.Type">
+            <summary>
+            變動類型 (increment, decrement, adjustment)
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.InventoryChange.Quantity">
+            <summary>
+            變動數量
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.InventoryChange.Reason">
+            <summary>
+            變動原因 (order, return, adjustment, etc.)
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.InventoryChange.ReferenceId">
+            <summary>
+            相關單據ID (如訂單ID)
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.InventoryChange.PreviousQuantity">
+            <summary>
+            變動前數量
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.InventoryChange.NewQuantity">
+            <summary>
+            變動後數量
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.InventoryChange.Timestamp">
+            <summary>
+            變動時間
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.InventoryChange.UserId">
+            <summary>
+            操作用戶ID
+            </summary>
+        </member>
+        <member name="T:ProductService.Models.Product">
+            <summary>
+            商品模型，對應MongoDB中的products集合
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.Id">
+            <summary>
+            商品唯一標識符
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.Name">
+            <summary>
+            商品名稱
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.Description">
+            <summary>
+            商品描述
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.Price">
+            <summary>
+            商品價格資訊
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.Images">
+            <summary>
+            商品圖片列表
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.CategoryId">
+            <summary>
+            商品分類ID
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.Attributes">
+            <summary>
+            商品屬性，使用動態字典存儲不同商品的特殊屬性
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.Variants">
+            <summary>
+            商品變體列表
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.Stock">
+            <summary>
+            商品庫存資訊
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.Status">
+            <summary>
+            商品狀態: active, inactive, outOfStock
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.Tags">
+            <summary>
+            商品標籤
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.Ratings">
+            <summary>
+            商品評分資訊
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.CreatedAt">
+            <summary>
+            商品創建時間
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.UpdatedAt">
+            <summary>
+            商品更新時間
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Product.Metadata">
+            <summary>
+            商品元數據
+            </summary>
+        </member>
+        <member name="T:ProductService.Models.PriceInfo">
+            <summary>
+            商品價格資訊
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.PriceInfo.Regular">
+            <summary>
+            正常價格
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.PriceInfo.Discount">
+            <summary>
+            折扣價格，如果沒有折扣則為null
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.PriceInfo.Currency">
+            <summary>
+            貨幣單位，預設為TWD
+            </summary>
+        </member>
+        <member name="T:ProductService.Models.ProductImage">
+            <summary>
+            商品圖片
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ProductImage.Url">
+            <summary>
+            圖片URL
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ProductImage.Alt">
+            <summary>
+            替代文字
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ProductImage.IsMain">
+            <summary>
+            是否為主圖
+            </summary>
+        </member>
+        <member name="T:ProductService.Models.ProductVariant">
+            <summary>
+            商品變體
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ProductVariant.VariantId">
+            <summary>
+            變體ID
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ProductVariant.Name">
+            <summary>
+            變體名稱
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ProductVariant.Attributes">
+            <summary>
+            變體特定屬性
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ProductVariant.Price">
+            <summary>
+            變體價格
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ProductVariant.Sku">
+            <summary>
+            庫存單位
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ProductVariant.Stock">
+            <summary>
+            庫存信息
+            </summary>
+        </member>
+        <member name="T:ProductService.Models.StockInfo">
+            <summary>
+            庫存資訊
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.StockInfo.Quantity">
+            <summary>
+            庫存數量
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.StockInfo.Reserved">
+            <summary>
+            已預留數量
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.StockInfo.Available">
+            <summary>
+            可用數量
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.StockInfo.LowStockThreshold">
+            <summary>
+            低庫存閾值
+            </summary>
+        </member>
+        <member name="T:ProductService.Models.RatingInfo">
+            <summary>
+            評分資訊
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.RatingInfo.Average">
+            <summary>
+            平均評分
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.RatingInfo.Count">
+            <summary>
+            評分數量
+            </summary>
+        </member>
+        <member name="T:ProductService.Models.ProductMetadata">
+            <summary>
+            商品元數據
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ProductMetadata.SearchKeywords">
+            <summary>
+            搜尋關鍵字
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ProductMetadata.SeoTitle">
+            <summary>
+            SEO標題
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ProductMetadata.SeoDescription">
+            <summary>
+            SEO描述
+            </summary>
+        </member>
+        <member name="T:ProductService.Models.Reservation">
+            <summary>
+            商品預留模型，對應MongoDB中的reservations集合
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Reservation.Id">
+            <summary>
+            預留唯一標識符
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Reservation.OwnerId">
+            <summary>
+            擁有者ID (如用戶ID或購物車ID)
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Reservation.OwnerType">
+            <summary>
+            擁有者類型 (user, cart, order等)
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Reservation.Items">
+            <summary>
+            預留項目列表
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Reservation.SessionId">
+            <summary>
+            會話ID
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Reservation.UserId">
+            <summary>
+            用戶ID (可選)
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Reservation.ExpiresAt">
+            <summary>
+            預留過期時間
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Reservation.Status">
+            <summary>
+            預留狀態 (active, used, expired, cancelled)
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Reservation.ReferenceId">
+            <summary>
+            關聯單據ID (如訂單ID)
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.Reservation.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="T:ProductService.Models.ReservationItem">
+            <summary>
+            預留項目
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ReservationItem.ProductId">
+            <summary>
+            商品ID
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ReservationItem.VariantId">
+            <summary>
+            變體ID (如果適用)
+            </summary>
+        </member>
+        <member name="P:ProductService.Models.ReservationItem.Quantity">
+            <summary>
+            預留數量
+            </summary>
+        </member>
+        <member name="T:ProductService.Services.CategoryService">
+            <summary>
+            分類服務實現
+            </summary>
+        </member>
+        <member name="M:ProductService.Services.CategoryService.#ctor(ProductService.Data.IProductDbContext,Microsoft.Extensions.Logging.ILogger{ProductService.Services.CategoryService})">
+            <summary>
+            構造函數
+            </summary>
+            <param name="dbContext">數據庫上下文</param>
+            <param name="logger">日誌記錄器</param>
+        </member>
+        <member name="M:ProductService.Services.CategoryService.CreateCategoryAsync(ProductService.DTOs.CreateCategoryRequest)">
+            <summary>
+            創建分類
+            </summary>
+            <param name="request">創建分類請求</param>
+            <returns>創建的分類</returns>
+        </member>
+        <member name="M:ProductService.Services.CategoryService.UpdateCategoryAsync(System.String,ProductService.DTOs.UpdateCategoryRequest)">
+            <summary>
+            更新分類
+            </summary>
+            <param name="id">分類ID</param>
+            <param name="request">更新分類請求</param>
+            <returns>更新後的分類</returns>
+        </member>
+        <member name="M:ProductService.Services.CategoryService.GetCategoryByIdAsync(System.String)">
+            <summary>
+            獲取分類
+            </summary>
+            <param name="id">分類ID</param>
+            <returns>分類</returns>
+        </member>
+        <member name="M:ProductService.Services.CategoryService.GetCategoryBySlugAsync(System.String)">
+            <summary>
+            根據Slug獲取分類
+            </summary>
+            <param name="slug">Slug</param>
+            <returns>分類</returns>
+        </member>
+        <member name="M:ProductService.Services.CategoryService.DeleteCategoryAsync(System.String)">
+            <summary>
+            刪除分類
+            </summary>
+            <param name="id">分類ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:ProductService.Services.CategoryService.GetAllCategoriesAsync(System.Boolean)">
+            <summary>
+            獲取所有分類
+            </summary>
+            <param name="includeInactive">是否包含未啟用的分類</param>
+            <returns>分類列表</returns>
+        </member>
+        <member name="M:ProductService.Services.CategoryService.GetChildCategoriesAsync(System.String,System.Boolean)">
+            <summary>
+            獲取子分類
+            </summary>
+            <param name="parentId">父分類ID</param>
+            <param name="includeInactive">是否包含未啟用的分類</param>
+            <returns>子分類列表</returns>
+        </member>
+        <member name="M:ProductService.Services.CategoryService.GetCategoryTreeAsync(System.Boolean)">
+            <summary>
+            獲取分類樹
+            </summary>
+            <param name="includeInactive">是否包含未啟用的分類</param>
+            <returns>分類樹</returns>
+        </member>
+        <member name="M:ProductService.Services.CategoryService.UpdateChildCategoriesPathAsync(System.String,System.String,System.String)">
+            <summary>
+            更新子分類的路徑
+            </summary>
+            <param name="parentId">父分類ID</param>
+            <param name="oldPath">舊路徑</param>
+            <param name="newPath">新路徑</param>
+            <returns>更新的分類數量</returns>
+        </member>
+        <member name="M:ProductService.Services.CategoryService.BuildCategoryTree(System.Collections.Generic.List{ProductService.Models.Category})">
+            <summary>
+            構建分類樹
+            </summary>
+            <param name="categories">分類列表</param>
+            <returns>分類樹</returns>
+        </member>
+        <member name="M:ProductService.Services.CategoryService.AddChildCategories(ProductService.DTOs.CategoryTreeNode,System.Collections.Generic.List{ProductService.Models.Category},System.Collections.Generic.Dictionary{System.String,ProductService.Models.Category})">
+            <summary>
+            添加子分類到分類樹節點
+            </summary>
+            <param name="parentNode">父節點</param>
+            <param name="allCategories">所有分類</param>
+            <param name="categoryDict">分類字典</param>
+        </member>
+        <member name="T:ProductService.Services.ICategoryService">
+            <summary>
+            分類服務接口
+            </summary>
+        </member>
+        <member name="M:ProductService.Services.ICategoryService.CreateCategoryAsync(ProductService.DTOs.CreateCategoryRequest)">
+            <summary>
+            創建分類
+            </summary>
+            <param name="request">創建分類請求</param>
+            <returns>創建的分類</returns>
+        </member>
+        <member name="M:ProductService.Services.ICategoryService.UpdateCategoryAsync(System.String,ProductService.DTOs.UpdateCategoryRequest)">
+            <summary>
+            更新分類
+            </summary>
+            <param name="id">分類ID</param>
+            <param name="request">更新分類請求</param>
+            <returns>更新後的分類</returns>
+        </member>
+        <member name="M:ProductService.Services.ICategoryService.GetCategoryByIdAsync(System.String)">
+            <summary>
+            獲取分類
+            </summary>
+            <param name="id">分類ID</param>
+            <returns>分類</returns>
+        </member>
+        <member name="M:ProductService.Services.ICategoryService.GetCategoryBySlugAsync(System.String)">
+            <summary>
+            根據Slug獲取分類
+            </summary>
+            <param name="slug">Slug</param>
+            <returns>分類</returns>
+        </member>
+        <member name="M:ProductService.Services.ICategoryService.DeleteCategoryAsync(System.String)">
+            <summary>
+            刪除分類
+            </summary>
+            <param name="id">分類ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:ProductService.Services.ICategoryService.GetAllCategoriesAsync(System.Boolean)">
+            <summary>
+            獲取所有分類
+            </summary>
+            <param name="includeInactive">是否包含未啟用的分類</param>
+            <returns>分類列表</returns>
+        </member>
+        <member name="M:ProductService.Services.ICategoryService.GetChildCategoriesAsync(System.String,System.Boolean)">
+            <summary>
+            獲取子分類
+            </summary>
+            <param name="parentId">父分類ID</param>
+            <param name="includeInactive">是否包含未啟用的分類</param>
+            <returns>子分類列表</returns>
+        </member>
+        <member name="M:ProductService.Services.ICategoryService.GetCategoryTreeAsync(System.Boolean)">
+            <summary>
+            獲取分類樹
+            </summary>
+            <param name="includeInactive">是否包含未啟用的分類</param>
+            <returns>分類樹</returns>
+        </member>
+        <member name="T:ProductService.Services.IInventoryService">
+            <summary>
+            庫存服務接口
+            </summary>
+        </member>
+        <member name="M:ProductService.Services.IInventoryService.CreateInventoryChangeAsync(System.String,System.String,System.String,System.Int32,System.String,System.String,System.String)">
+            <summary>
+            創建庫存變動記錄
+            </summary>
+            <param name="productId">商品ID</param>
+            <param name="variantId">變體ID</param>
+            <param name="type">變動類型</param>
+            <param name="quantity">變動數量</param>
+            <param name="reason">變動原因</param>
+            <param name="referenceId">相關單據ID</param>
+            <param name="userId">操作用戶ID</param>
+            <returns>庫存變動記錄</returns>
+        </member>
+        <member name="M:ProductService.Services.IInventoryService.GetInventoryChangesAsync(System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            獲取商品庫存變動記錄
+            </summary>
+            <param name="productId">商品ID</param>
+            <param name="variantId">變體ID</param>
+            <param name="page">頁碼</param>
+            <param name="pageSize">每頁大小</param>
+            <returns>分頁庫存變動記錄</returns>
+        </member>
+        <member name="M:ProductService.Services.IInventoryService.CreateReservationAsync(ProductService.DTOs.CreateReservationRequest)">
+            <summary>
+            創建商品預留
+            </summary>
+            <param name="request">預留請求</param>
+            <returns>預留</returns>
+        </member>
+        <member name="M:ProductService.Services.IInventoryService.ConfirmReservationAsync(System.String,System.String)">
+            <summary>
+            確認預留
+            </summary>
+            <param name="id">預留ID</param>
+            <param name="referenceId">相關單據ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:ProductService.Services.IInventoryService.CancelReservationAsync(System.String)">
+            <summary>
+            取消預留
+            </summary>
+            <param name="id">預留ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:ProductService.Services.IInventoryService.CleanupExpiredReservationsAsync">
+            <summary>
+            清理過期預留
+            </summary>
+            <returns>清理的預留數量</returns>
+        </member>
+        <member name="M:ProductService.Services.IInventoryService.GetReservationsBySessionAsync(System.String)">
+            <summary>
+            獲取會話的預留
+            </summary>
+            <param name="sessionId">會話ID</param>
+            <returns>預留列表</returns>
+        </member>
+        <member name="M:ProductService.Services.IInventoryService.GetReservationsByUserAsync(System.String)">
+            <summary>
+            獲取用戶的預留
+            </summary>
+            <param name="userId">用戶ID</param>
+            <returns>預留列表</returns>
+        </member>
+        <member name="T:ProductService.Services.InventoryService">
+            <summary>
+            庫存服務實現
+            </summary>
+            <summary>
+            庫存服務的預留相關功能
+            </summary>
+            <summary>
+            庫存服務的庫存更新相關功能
+            </summary>
+        </member>
+        <member name="M:ProductService.Services.InventoryService.#ctor(ProductService.Data.IProductDbContext,Microsoft.Extensions.Logging.ILogger{ProductService.Services.InventoryService},ProductService.Services.IProductService,ProductService.Messaging.Publishers.InventoryEventPublisher)">
+            <summary>
+            構造函數
+            </summary>
+            <param name="dbContext">數據庫上下文</param>
+            <param name="logger">日誌記錄器</param>
+            <param name="productService">商品服務</param>
+            <param name="inventoryEventPublisher">庫存事件發布器</param>
+        </member>
+        <member name="M:ProductService.Services.InventoryService.GetInventoryChangesAsync(System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            獲取商品庫存變動記錄
+            </summary>
+            <param name="productId">商品ID</param>
+            <param name="variantId">變體ID</param>
+            <param name="page">頁碼</param>
+            <param name="pageSize">每頁大小</param>
+            <returns>分頁庫存變動記錄</returns>
+        </member>
+        <member name="M:ProductService.Services.InventoryService.CreateReservationAsync(ProductService.DTOs.CreateReservationRequest)">
+            <summary>
+            創建商品預留
+            </summary>
+            <param name="request">預留請求</param>
+            <returns>預留</returns>
+        </member>
+        <member name="M:ProductService.Services.InventoryService.ConfirmReservationAsync(System.String,System.String)">
+            <summary>
+            確認預留
+            </summary>
+            <param name="id">預留ID</param>
+            <param name="referenceId">相關單據ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:ProductService.Services.InventoryService.CancelReservationAsync(System.String)">
+            <summary>
+            取消預留
+            </summary>
+            <param name="id">預留ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:ProductService.Services.InventoryService.CleanupExpiredReservationsAsync">
+            <summary>
+            清理過期預留
+            </summary>
+            <returns>清理的預留數量</returns>
+        </member>
+        <member name="M:ProductService.Services.InventoryService.GetReservationsBySessionAsync(System.String)">
+            <summary>
+            獲取會話的預留
+            </summary>
+            <param name="sessionId">會話ID</param>
+            <returns>預留列表</returns>
+        </member>
+        <member name="M:ProductService.Services.InventoryService.GetReservationsByUserAsync(System.String)">
+            <summary>
+            獲取用戶的預留
+            </summary>
+            <param name="userId">用戶ID</param>
+            <returns>預留列表</returns>
+        </member>
+        <member name="M:ProductService.Services.InventoryService.CreateInventoryChangeAsync(System.String,System.String,System.String,System.Int32,System.String,System.String,System.String)">
+            <summary>
+            創建庫存變動記錄
+            </summary>
+            <param name="productId">商品ID</param>
+            <param name="variantId">變體ID</param>
+            <param name="type">變動類型</param>
+            <param name="quantity">變動數量</param>
+            <param name="reason">變動原因</param>
+            <param name="referenceId">相關單據ID</param>
+            <param name="userId">操作用戶ID</param>
+            <returns>庫存變動記錄</returns>
+        </member>
+        <member name="T:ProductService.Services.IProductService">
+            <summary>
+            商品服務接口
+            </summary>
+        </member>
+        <member name="M:ProductService.Services.IProductService.CreateProductAsync(ProductService.DTOs.CreateProductRequest)">
+            <summary>
+            創建商品
+            </summary>
+            <param name="request">創建商品請求</param>
+            <returns>創建的商品</returns>
+        </member>
+        <member name="M:ProductService.Services.IProductService.UpdateProductAsync(System.String,ProductService.DTOs.UpdateProductRequest)">
+            <summary>
+            更新商品
+            </summary>
+            <param name="id">商品ID</param>
+            <param name="request">更新商品請求</param>
+            <returns>更新後的商品</returns>
+        </member>
+        <member name="M:ProductService.Services.IProductService.GetProductByIdAsync(System.String)">
+            <summary>
+            獲取商品
+            </summary>
+            <param name="id">商品ID</param>
+            <returns>商品</returns>
+        </member>
+        <member name="M:ProductService.Services.IProductService.DeleteProductAsync(System.String)">
+            <summary>
+            刪除商品
+            </summary>
+            <param name="id">商品ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:ProductService.Services.IProductService.GetProductsAsync(System.Int32,System.Int32,System.String,System.String,System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.String,System.String)">
+            <summary>
+            分頁獲取商品列表
+            </summary>
+            <param name="page">頁碼</param>
+            <param name="pageSize">每頁大小</param>
+            <param name="categoryId">分類ID</param>
+            <param name="status">商品狀態</param>
+            <param name="minPrice">最低價格</param>
+            <param name="maxPrice">最高價格</param>
+            <param name="sortBy">排序字段</param>
+            <param name="sortDirection">排序方向</param>
+            <returns>分頁商品列表</returns>
+        </member>
+        <member name="M:ProductService.Services.IProductService.SearchProductsAsync(System.String,System.Int32,System.Int32,System.String,System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.String,System.String)">
+            <summary>
+            搜尋商品
+            </summary>
+            <param name="keyword">關鍵字</param>
+            <param name="page">頁碼</param>
+            <param name="pageSize">每頁大小</param>
+            <param name="categoryId">分類ID</param>
+            <param name="minPrice">最低價格</param>
+            <param name="maxPrice">最高價格</param>
+            <param name="sortBy">排序字段</param>
+            <param name="sortDirection">排序方向</param>
+            <returns>分頁商品列表</returns>
+        </member>
+        <member name="M:ProductService.Services.IProductService.UpdateProductStockAsync(System.String,ProductService.DTOs.UpdateStockRequest)">
+            <summary>
+            更新商品庫存
+            </summary>
+            <param name="id">商品ID</param>
+            <param name="request">庫存更新請求</param>
+            <returns>更新後的商品</returns>
+        </member>
+        <member name="M:ProductService.Services.IProductService.GetProductStockAsync(System.String,System.String)">
+            <summary>
+            獲取商品庫存
+            </summary>
+            <param name="id">商品ID</param>
+            <param name="variantId">變體ID</param>
+            <returns>庫存信息</returns>
+        </member>
+        <member name="T:ProductService.Services.ProductService">
+            <summary>
+            商品服務實現
+            </summary>
+        </member>
+        <member name="M:ProductService.Services.ProductService.#ctor(ProductService.Data.IProductDbContext,ProductService.Services.IInventoryService,Microsoft.Extensions.Logging.ILogger{ProductService.Services.ProductService})">
+            <summary>
+            構造函數
+            </summary>
+            <param name="dbContext">數據庫上下文</param>
+            <param name="inventoryService">庫存服務</param>
+            <param name="logger">日誌記錄器</param>
+        </member>
+        <member name="M:ProductService.Services.ProductService.CreateProductAsync(ProductService.DTOs.CreateProductRequest)">
+            <summary>
+            創建商品
+            </summary>
+            <param name="request">創建商品請求</param>
+            <returns>創建的商品</returns>
+        </member>
+        <member name="M:ProductService.Services.ProductService.UpdateProductAsync(System.String,ProductService.DTOs.UpdateProductRequest)">
+            <summary>
+            更新商品
+            </summary>
+            <param name="id">商品ID</param>
+            <param name="request">更新商品請求</param>
+            <returns>更新後的商品</returns>
+        </member>
+        <member name="M:ProductService.Services.ProductService.GetProductByIdAsync(System.String)">
+            <summary>
+            獲取商品
+            </summary>
+            <param name="id">商品ID</param>
+            <returns>商品</returns>
+        </member>
+        <member name="M:ProductService.Services.ProductService.DeleteProductAsync(System.String)">
+            <summary>
+            刪除商品
+            </summary>
+            <param name="id">商品ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:ProductService.Services.ProductService.GetProductsAsync(System.Int32,System.Int32,System.String,System.String,System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.String,System.String)">
+            <summary>
+            分頁獲取商品列表
+            </summary>
+            <param name="page">頁碼</param>
+            <param name="pageSize">每頁大小</param>
+            <param name="categoryId">分類ID</param>
+            <param name="status">商品狀態</param>
+            <param name="minPrice">最低價格</param>
+            <param name="maxPrice">最高價格</param>
+            <param name="sortBy">排序字段</param>
+            <param name="sortDirection">排序方向</param>
+            <returns>分頁商品列表</returns>
+        </member>
+        <member name="M:ProductService.Services.ProductService.SearchProductsAsync(System.String,System.Int32,System.Int32,System.String,System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.String,System.String)">
+            <summary>
+            搜尋商品
+            </summary>
+            <param name="keyword">關鍵字</param>
+            <param name="page">頁碼</param>
+            <param name="pageSize">每頁大小</param>
+            <param name="categoryId">分類ID</param>
+            <param name="minPrice">最低價格</param>
+            <param name="maxPrice">最高價格</param>
+            <param name="sortBy">排序字段</param>
+            <param name="sortDirection">排序方向</param>
+            <returns>分頁商品列表</returns>
+        </member>
+        <member name="M:ProductService.Services.ProductService.UpdateProductStockAsync(System.String,ProductService.DTOs.UpdateStockRequest)">
+            <summary>
+            更新商品庫存
+            </summary>
+            <param name="id">商品ID</param>
+            <param name="request">庫存更新請求</param>
+            <returns>更新後的商品</returns>
+        </member>
+        <member name="M:ProductService.Services.ProductService.GetProductStockAsync(System.String,System.String)">
+            <summary>
+            獲取商品庫存
+            </summary>
+            <param name="id">商品ID</param>
+            <param name="variantId">變體ID</param>
+            <returns>庫存信息</returns>
+        </member>
+        <member name="T:ProductService.Settings.MongoDbSettings">
+            <summary>
+            MongoDB設置
+            </summary>
+        </member>
+        <member name="P:ProductService.Settings.MongoDbSettings.ConnectionString">
+            <summary>
+            連接字符串
+            </summary>
+        </member>
+        <member name="P:ProductService.Settings.MongoDbSettings.DatabaseName">
+            <summary>
+            數據庫名稱
+            </summary>
+        </member>
+    </members>
+</doc>

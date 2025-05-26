@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using ProductService.Services;
-using Shared.Messaging.Handlers;
-using Shared.Messaging.Messages;
+using Shared.Messaging;
 
 namespace ProductService.Messaging.Handlers
 {
@@ -78,5 +77,45 @@ namespace ProductService.Messaging.Handlers
                 throw;
             }
         }
+    }
+
+    /// <summary>
+    /// 消息處理器介面
+    /// </summary>
+    /// <typeparam name="T">消息類型</typeparam>
+    public interface IMessageHandler<T> where T : BaseMessage
+    {
+        /// <summary>
+        /// 處理消息
+        /// </summary>
+        /// <param name="message">消息</param>
+        /// <returns>異步任務</returns>
+        Task HandleAsync(T message);
+    }
+
+    /// <summary>
+    /// 訂單創建消息
+    /// </summary>
+    public class OrderCreatedMessage : BaseMessage
+    {
+        public string OrderId { get; set; } = null!;
+        public string OrderNumber { get; set; } = null!;
+        public string UserId { get; set; } = null!;
+        public decimal TotalAmount { get; set; }
+        public string Currency { get; set; } = "TWD";
+        public List<OrderItemMessage> Items { get; set; } = new List<OrderItemMessage>();
+    }
+
+    /// <summary>
+    /// 訂單項目消息
+    /// </summary>
+    public class OrderItemMessage
+    {
+        public string ProductId { get; set; } = null!;
+        public string? VariantId { get; set; }
+        public string Name { get; set; } = null!;
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal TotalPrice { get; set; }
     }
 }

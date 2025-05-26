@@ -1,0 +1,157 @@
+.payment-method-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Microsoft JhengHei', Arial, sans-serif;
+}
+
+.payment-method-container h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.order-summary {
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.order-summary h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.payment-methods h2 {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.method-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.method-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.method-item:hover {
+  border-color: #2196f3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.method-item.selected {
+  border-color: #2196f3;
+  background-color: #e3f2fd;
+}
+
+.method-icon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+.method-icon img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.default-icon {
+  width: 100%;
+  height: 100%;
+  background-color: #e0e0e0;
+  color: #616161;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 50%;
+}
+
+.method-info {
+  flex: 1;
+}
+
+.method-info h3 {
+  margin: 0 0 5px 0;
+  font-size: 1rem;
+}
+
+.method-info p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.method-select {
+  margin-left: 15px;
+}
+
+.payment-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.back-button,
+.proceed-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.back-button {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.back-button:hover {
+  background-color: #d5d5d5;
+}
+
+.proceed-button {
+  background-color: #2196f3;
+  color: white;
+}
+
+.proceed-button:hover {
+  background-color: #1976d2;
+}
+
+.proceed-button:disabled {
+  background-color: #b0bec5;
+  cursor: not-allowed;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #666;
+}

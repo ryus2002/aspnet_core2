@@ -90,7 +90,7 @@ namespace ProductService.DTOs
         public ProductMetadataDto? Metadata { get; set; }
     }
 
-        /// <summary>
+    /// <summary>
     /// 更新商品請求
     /// </summary>
     public class UpdateProductRequest
@@ -161,9 +161,9 @@ namespace ProductService.DTOs
         public ProductMetadataDto? Metadata { get; set; }
     }
 
-        /// <summary>
+    /// <summary>
     /// 商品元數據DTO
-        /// </summary>
+    /// </summary>
     public class ProductMetadataDto
     {
         /// <summary>
@@ -202,9 +202,9 @@ namespace ProductService.DTOs
         public bool IsMain { get; set; }
     }
 
-        /// <summary>
+    /// <summary>
     /// 商品變體DTO
-        /// </summary>
+    /// </summary>
     public class ProductVariantDto
     {
         /// <summary>
@@ -281,6 +281,47 @@ namespace ProductService.DTOs
     public class CreateReservationRequest
     {
         /// <summary>
+        /// 擁有者ID (如用戶ID或購物車ID)
+        /// </summary>
+        [Required(ErrorMessage = "擁有者ID為必填")]
+        public string OwnerId { get; set; } = null!;
+
+        /// <summary>
+        /// 擁有者類型 (user, cart, order等)
+        /// </summary>
+        [Required(ErrorMessage = "擁有者類型為必填")]
+        public string OwnerType { get; set; } = null!;
+
+        /// <summary>
+        /// 預留項目列表
+        /// </summary>
+        [Required(ErrorMessage = "預留項目列表為必填")]
+        public List<ReservationItemDto> Items { get; set; } = new List<ReservationItemDto>();
+
+        /// <summary>
+        /// 會話ID
+        /// </summary>
+        [Required(ErrorMessage = "會話ID為必填")]
+        public string SessionId { get; set; } = null!;
+
+        /// <summary>
+        /// 用戶ID (可選)
+        /// </summary>
+        public string? UserId { get; set; }
+        
+        /// <summary>
+        /// 預留過期分鐘數 (預設15分鐘)
+        /// </summary>
+        [Range(1, 1440, ErrorMessage = "預留過期時間必須在1-1440分鐘之間")]
+        public int? ExpirationMinutes { get; set; } = 15;
+    }
+
+    /// <summary>
+    /// 預留項目DTO
+    /// </summary>
+    public class ReservationItemDto
+    {
+        /// <summary>
         /// 商品ID
         /// </summary>
         [Required(ErrorMessage = "商品ID為必填")]
@@ -297,26 +338,11 @@ namespace ProductService.DTOs
         [Required(ErrorMessage = "預留數量為必填")]
         [Range(1, int.MaxValue, ErrorMessage = "預留數量必須大於0")]
         public int Quantity { get; set; }
-
-        /// <summary>
-        /// 會話ID
-        /// </summary>
-        [Required(ErrorMessage = "會話ID為必填")]
-        public string SessionId { get; set; } = null!;
-
-        /// <summary>
-        /// 用戶ID (可選)
-        /// </summary>
-        public string? UserId { get; set; }
-        /// <summary>
-        /// 預留過期分鐘數 (預設15分鐘)
-        /// </summary>
-        [Range(1, 1440, ErrorMessage = "預留過期時間必須在1-1440分鐘之間")]
-        public int? ExpirationMinutes { get; set; } = 15;
     }
-        /// <summary>
+
+    /// <summary>
     /// 分頁響應
-        /// </summary>
+    /// </summary>
     /// <typeparam name="T">數據類型</typeparam>
     public class PagedResponse<T>
     {

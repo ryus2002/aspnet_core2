@@ -163,6 +163,12 @@ namespace ProductService.Models
         public string VariantId { get; set; } = null!;
 
         /// <summary>
+        /// 變體名稱
+        /// </summary>
+        [BsonElement("name")]
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>
         /// 變體特定屬性
         /// </summary>
         [BsonElement("attributes")]
@@ -181,10 +187,10 @@ namespace ProductService.Models
         public string Sku { get; set; } = null!;
 
         /// <summary>
-        /// 庫存數量
+        /// 庫存信息
         /// </summary>
         [BsonElement("stock")]
-        public int Stock { get; set; }
+        public StockInfo Stock { get; set; } = new StockInfo();
     }
 
     /// <summary>

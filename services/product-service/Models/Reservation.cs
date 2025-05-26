@@ -16,23 +16,22 @@ namespace ProductService.Models
         public string Id { get; set; } = null!;
 
         /// <summary>
-        /// 商品ID
+        /// 擁有者ID (如用戶ID或購物車ID)
         /// </summary>
-        [BsonElement("productId")]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string ProductId { get; set; } = null!;
+        [BsonElement("ownerId")]
+        public string OwnerId { get; set; } = null!;
 
         /// <summary>
-        /// 變體ID (如果適用)
+        /// 擁有者類型 (user, cart, order等)
         /// </summary>
-        [BsonElement("variantId")]
-        public string? VariantId { get; set; }
+        [BsonElement("ownerType")]
+        public string OwnerType { get; set; } = null!;
 
         /// <summary>
-        /// 預留數量
+        /// 預留項目列表
         /// </summary>
-        [BsonElement("quantity")]
-        public int Quantity { get; set; }
+        [BsonElement("items")]
+        public List<ReservationItem> Items { get; set; } = new List<ReservationItem>();
 
         /// <summary>
         /// 會話ID
@@ -69,5 +68,30 @@ namespace ProductService.Models
         /// </summary>
         [BsonElement("createdAt")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// 預留項目
+    /// </summary>
+    public class ReservationItem
+    {
+        /// <summary>
+        /// 商品ID
+        /// </summary>
+        [BsonElement("productId")]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string ProductId { get; set; } = null!;
+
+        /// <summary>
+        /// 變體ID (如果適用)
+        /// </summary>
+        [BsonElement("variantId")]
+        public string? VariantId { get; set; }
+
+        /// <summary>
+        /// 預留數量
+        /// </summary>
+        [BsonElement("quantity")]
+        public int Quantity { get; set; }
     }
 }

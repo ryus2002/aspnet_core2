@@ -1,87 +1,124 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using ProductService.DTOs;
 using ProductService.Models;
 
 namespace ProductService.Services
 {
-    /// <summary>
-    /// 庫存服務接口
-    /// </summary>
-    public interface IInventoryService
+    public partial class InventoryService
     {
         /// <summary>
-        /// 創建庫存變動記錄
+        /// 按條件獲取預留
         /// </summary>
-        /// <param name="productId">商品ID</param>
-        /// <param name="variantId">變體ID</param>
-        /// <param name="type">變動類型</param>
-        /// <param name="quantity">變動數量</param>
-        /// <param name="reason">變動原因</param>
-        /// <param name="referenceId">相關單據ID</param>
-        /// <param name="userId">操作用戶ID</param>
-        /// <returns>庫存變動記錄</returns>
-        Task<InventoryChange> CreateInventoryChangeAsync(
-            string productId, 
-            string? variantId, 
-            string type, 
-            int quantity, 
-            string reason, 
-            string? referenceId = null, 
-            string? userId = null);
-
-        /// <summary>
-        /// 獲取商品庫存變動記錄
-        /// </summary>
-        /// <param name="productId">商品ID</param>
-        /// <param name="variantId">變體ID</param>
-        /// <param name="page">頁碼</param>
-        /// <param name="pageSize">每頁大小</param>
-        /// <returns>分頁庫存變動記錄</returns>
-        Task<PagedResponse<InventoryChange>> GetInventoryChangesAsync(
+        /// <param name="filters">過濾條件</param>
+        /// <returns>預留列表</returns>
+        public async Task<List<Reservation>> GetReservationsAsync(Dictionary<string, object> filters)
+        {
+            try
+            {
+                _logger?.LogInformation($"按條件獲取預留: 條件數量={filters.Count}");
+                
+                var filterBuilder = Builders<Reservation>.Filter;
+                var filter = filterBuilder.Empty;
+                
+                foreach (var kvp in filters)
+                {
+                    switch (kvp.Key)
+                    {
+                        case "Id":
+                            filter &= filterBuilder.Eq(r => r.Id, kvp.Value.ToString());
+                            break;
+                        case "OwnerId":
+                            filter &= filterBuilder.Eq(r => r.OwnerId, kvp.Value.ToString());
+                            break;
+                        case "OwnerType":
+                            filter &= filterBuilder.Eq(r => r.OwnerType, kvp.Value.ToString());
+                            break;
+                        case "SessionId":
+                            filter &= filterBuilder.Eq(r => r.SessionId, kvp.Value.ToString());
+                            break;
+                        case "UserId":
+                            filter &= filterBuilder.Eq(r => r.UserId, kvp.Value.ToString());
+                            break;
+                        case "Status":
+                            filter &= filterBuilder.Eq(r => r.Status, kvp.Value.ToString());
+                            break;
+                        case "ReferenceId":
+                            filter &= filterBuilder.Eq(r => r.ReferenceId, kvp.Value.ToString());
+                            break;
+                        case "ProductId":
+                            filter &= filterBuilder.ElemMatch(r => r.Items, 
+                                Builders<ReservationItem>.Filter.Eq(i => i.ProductId, kvp.Value.ToString()));
+                            break;
+                        case "VariantId":
+                            filter &= filterBuilder.ElemMatch(r => r.Items, 
+                                Builders<ReservationItem>.Filter.Eq(i => i.VariantId, kvp.Value.ToString()));
+                            break;
+                        default:
+                            _logger?.LogWarning($"未知的過濾條件: {kvp.Key}");
+                            break;
+                    }
+                }
+                
+                var reservations = await _dbContext.Reservations.Find(filter).ToListAsync();
+                
+                _logger?.LogInformation($"按條件獲取預留完成: 找到={reservations.Count}");
+                return reservations;
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "按條件獲取預留時發生錯誤");
+                return new List<Reservation>();
+            }
+        }
+        public async Task<PagedResponse<InventoryChange>> GetInventoryChangesAsync(
             string productId, 
             string? variantId = null, 
             int page = 1, 
-            int pageSize = 10);
-
-        /// <summary>
-        /// 創建商品預留
-        /// </summary>
-        /// <param name="request">預留請求</param>
-        /// <returns>預留</returns>
-        Task<Reservation> CreateReservationAsync(CreateReservationRequest request);
-
-        /// <summary>
-        /// 確認預留
-        /// </summary>
-        /// <param name="id">預留ID</param>
-        /// <param name="referenceId">相關單據ID</param>
-        /// <returns>是否成功</returns>
-        Task<bool> ConfirmReservationAsync(string id, string referenceId);
-
-        /// <summary>
-        /// 取消預留
-        /// </summary>
-        /// <param name="id">預留ID</param>
-        /// <returns>是否成功</returns>
-        Task<bool> CancelReservationAsync(string id);
-
-        /// <summary>
-        /// 清理過期預留
-        /// </summary>
-        /// <returns>清理的預留數量</returns>
-        Task<int> CleanupExpiredReservationsAsync();
-
-        /// <summary>
-        /// 獲取會話的預留
-        /// </summary>
-        /// <param name="sessionId">會話ID</param>
-        /// <returns>預留列表</returns>
-        Task<List<Reservation>> GetReservationsBySessionAsync(string sessionId);
-
-        /// <summary>
-        /// 獲取用戶的預留
-        /// </summary>
-        /// <param name="userId">用戶ID</param>
-        /// <returns>預留列表</returns>
-        Task<List<Reservation>> GetReservationsByUserAsync(string userId);
+            int pageSize = 10)
+        {
+            try
+            {
+                _logger?.LogInformation($"獲取庫存變動記錄: ProductId={productId}, VariantId={variantId}, Page={page}, PageSize={pageSize}");
+                
+                var filterBuilder = Builders<InventoryChange>.Filter;
+                var filter = filterBuilder.Eq(c => c.ProductId, productId);
+                
+                if (!string.IsNullOrEmpty(variantId))
+                {
+                    filter &= filterBuilder.Eq(c => c.VariantId, variantId);
+                }
+                
+                var totalItems = await _dbContext.InventoryChanges.CountDocumentsAsync(filter);
+                var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+                
+                var changes = await _dbContext.InventoryChanges
+                    .Find(filter)
+                    .Sort(Builders<InventoryChange>.Sort.Descending(c => c.CreatedAt))
+                    .Skip((page - 1) * pageSize)
+                    .Limit(pageSize)
+                    .ToListAsync();
+                
+                var response = new PagedResponse<InventoryChange>
+                {
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    Items = changes
+                };
+                
+                _logger?.LogInformation($"獲取庫存變動記錄完成: ProductId={productId}, Count={changes.Count}");
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, $"獲取庫存變動記錄時發生錯誤: ProductId={productId}");
+                throw;
+            }
+        }
     }
 }

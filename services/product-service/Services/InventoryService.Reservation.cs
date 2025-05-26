@@ -1,14 +1,15 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using ProductService.DTOs;
 using ProductService.Models;
 using ProductService.Messaging.Publishers;
 
 namespace ProductService.Services
 {
-    /// <summary>
-    /// 庫存服務的預留相關功能
-    /// </summary>
-    public partial class InventoryService : IInventoryService
+    public partial class InventoryService
     {
         /// <summary>
         /// 創建商品預留
@@ -17,90 +18,140 @@ namespace ProductService.Services
         /// <returns>預留</returns>
         public async Task<Reservation> CreateReservationAsync(CreateReservationRequest request)
         {
-            _logger.LogInformation("創建商品預留: OwnerId={OwnerId}, OwnerType={OwnerType}, Items={ItemCount}",
-                request.OwnerId, request.OwnerType, request.Items.Count);
-
-            // 檢查預留項目
-            if (request.Items == null || !request.Items.Any())
+            try
             {
-                throw new BadRequestException("預留項目不能為空");
-            }
-
-            // 檢查每個商品的庫存是否足夠
-            foreach (var item in request.Items)
-            {
-                var product = await _productService.GetProductByIdAsync(item.ProductId);
-                if (product == null)
+                _logger?.LogInformation($"嘗試創建預留: OwnerId={request.OwnerId}, OwnerType={request.OwnerType}, 項目數量={request.Items.Count}");
+                
+                // 驗證預留項目
+                if (request.Items == null || request.Items.Count == 0)
                 {
-                    throw new NotFoundException($"找不到商品: {item.ProductId}");
+                    _logger?.LogWarning("預留項目列表為空");
+                    throw new ArgumentException("預留項目列表不能為空", nameof(request.Items));
                 }
-
-                int availableQuantity;
-                if (item.VariantId != null)
+                
+                // 檢查所有產品是否存在且庫存足夠
+                foreach (var item in request.Items)
                 {
-                    var variant = product.Variants.FirstOrDefault(v => v.Id == item.VariantId);
-                    if (variant == null)
+                    var filter = Builders<Product>.Filter.Eq(p => p.Id, item.ProductId);
+                    var product = await _dbContext.Products.Find(filter).FirstOrDefaultAsync();
+                    
+                    if (product == null)
                     {
-                        throw new NotFoundException($"找不到商品變體: {item.VariantId}");
+                        _logger?.LogWarning($"找不到產品: {item.ProductId}");
+                        throw new ArgumentException($"找不到產品: {item.ProductId}", nameof(item.ProductId));
                     }
-                    availableQuantity = variant.Stock.Quantity;
-                }
-                else
-                {
-                    availableQuantity = product.Stock.Quantity;
-                }
+                    // 檢查變體庫存或主產品庫存
+                    if (item.VariantId != null)
+                    {
+                        var variant = product.Variants?.FirstOrDefault(v => v.VariantId == item.VariantId);
+                        if (variant == null)
+                        {
+                            _logger?.LogWarning($"找不到產品變體: 產品={item.ProductId}, 變體={item.VariantId}");
+                            throw new ArgumentException($"找不到產品變體: {item.VariantId}", nameof(item.VariantId));
+                        }
 
-                if (availableQuantity < item.Quantity)
-                {
-                    throw new BadRequestException($"商品 {product.Name} 庫存不足: 需要 {item.Quantity}, 可用 {availableQuantity}");
-                }
-            }
-
-            // 創建預留
-            var reservation = new Reservation
+                        if (variant.Stock < item.Quantity)
+                        {
+                            _logger?.LogWarning($"變體庫存不足: 產品={item.ProductId}, 變體={item.VariantId}, 可用={variant.Stock}, 請求={item.Quantity}");
+                            throw new InvalidOperationException($"變體庫存不足: 可用={variant.Stock}, 請求={item.Quantity}");
+                        }
+                    }
+                    else
             {
-                Id = Guid.NewGuid().ToString(),
-                OwnerId = request.OwnerId,
-                OwnerType = request.OwnerType,
-                Status = "Active",
-                ExpiresAt = DateTime.UtcNow.AddMinutes(request.ExpirationMinutes > 0 ? request.ExpirationMinutes : 30),
-                CreatedAt = DateTime.UtcNow,
-                Items = new List<ReservationItem>()
-            };
-
-            // 添加預留項目並更新庫存
-            foreach (var item in request.Items)
-            {
-                reservation.Items.Add(new ReservationItem
-                {
-                    ProductId = item.ProductId,
-                    VariantId = item.VariantId,
-                    Quantity = item.Quantity
-                });
-
-                // 創建庫存變動記錄（減少庫存）
-                await CreateInventoryChangeAsync(
-                    productId: item.ProductId,
-                    variantId: item.VariantId,
-                    type: "Reserved",
-                    quantity: -item.Quantity, // 負數表示減少庫存
-                    reason: $"商品預留: {reservation.Id}",
-                    referenceId: reservation.Id,
-                    userId: null);
+                        if (product.Stock.Available < item.Quantity)
+                        {
+                            _logger?.LogWarning($"庫存不足: 產品={item.ProductId}, 可用={product.Stock.Available}, 請求={item.Quantity}");
+                            throw new InvalidOperationException($"庫存不足: 可用={product.Stock.Available}, 請求={item.Quantity}");
             }
-
-            // 保存預留
-            await _dbContext.Reservations.InsertOneAsync(reservation);
-
-            _logger.LogInformation("商品預留已創建: Id={Id}, OwnerId={OwnerId}, ExpiresAt={ExpiresAt}",
-                reservation.Id, request.OwnerId, reservation.ExpiresAt);
-
-            // 發布庫存預留事件
-            await _inventoryEventPublisher.PublishInventoryReservedEventAsync(reservation);
-
-            return reservation;
         }
-
+                }
+        
+                // 創建預留記錄
+                var reservation = new Reservation
+        {
+                    OwnerId = request.OwnerId,
+                    OwnerType = request.OwnerType,
+                    Items = request.Items.Select(i => new ReservationItem
+                    {
+                        ProductId = i.ProductId,
+                        VariantId = i.VariantId,
+                        Quantity = i.Quantity
+                    }).ToList(),
+                    SessionId = request.SessionId,
+                    UserId = request.UserId,
+                    Status = "active",
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(request.ExpirationMinutes ?? 15),
+                    CreatedAt = DateTime.UtcNow
+                };
+                
+                await _dbContext.Reservations.InsertOneAsync(reservation);
+                
+                // 更新各產品庫存
+                foreach (var item in reservation.Items)
+                {
+                    // 更新產品庫存
+                    if (item.VariantId != null)
+            {
+                        // 更新變體庫存
+                        var filter = Builders<Product>.Filter.And(
+                            Builders<Product>.Filter.Eq(p => p.Id, item.ProductId),
+                            Builders<Product>.Filter.ElemMatch(p => p.Variants, v => v.VariantId == item.VariantId)
+                        );
+                        
+                        var update = Builders<Product>.Update
+                            .Inc("Variants.$.Stock", -item.Quantity);
+                        
+                        await _dbContext.Products.UpdateOneAsync(filter, update);
+            }
+                    else
+        {
+                        // 更新主產品庫存
+                        var filter = Builders<Product>.Filter.Eq(p => p.Id, item.ProductId);
+                        var update = Builders<Product>.Update
+                            .Inc(p => p.Stock.Reserved, item.Quantity)
+                            .Inc(p => p.Stock.Available, -item.Quantity);
+                        
+                        await _dbContext.Products.UpdateOneAsync(filter, update);
+                    }
+                    
+                    // 記錄庫存變動
+                    await CreateInventoryChangeAsync(
+                        item.ProductId,
+                        item.VariantId,
+                        "reserve",
+                        item.Quantity,
+                        "庫存預留",
+                        reservation.Id,
+                        request.UserId
+                    );
+                }
+                
+                // 發布庫存預留事件
+                if (_eventPublisher != null)
+                {
+                    await _eventPublisher.PublishInventoryReservedEventAsync(
+                        reservation.Id,
+                        request.OwnerId,
+                        request.OwnerType,
+                        reservation.Items.Select(i => new ReservationItemMessage
+            {
+                            ProductId = i.ProductId,
+                            VariantId = i.VariantId,
+                            Quantity = i.Quantity
+                        }).ToList()
+                    );
+            }
+                
+                _logger?.LogInformation($"庫存預留成功: Id={reservation.Id}, OwnerId={request.OwnerId}, 項目數量={request.Items.Count}");
+                return reservation;
+        }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, $"創建預留時發生錯誤: OwnerId={request.OwnerId}, OwnerType={request.OwnerType}");
+                throw;
+    }
+}
+        
         /// <summary>
         /// 確認預留
         /// </summary>
@@ -109,40 +160,78 @@ namespace ProductService.Services
         /// <returns>是否成功</returns>
         public async Task<bool> ConfirmReservationAsync(string id, string referenceId)
         {
-            _logger.LogInformation("確認商品預留: Id={Id}, ReferenceId={ReferenceId}", id, referenceId);
-
-            // 獲取預留
-            var reservation = await _dbContext.Reservations.Find(r => r.Id == id).FirstOrDefaultAsync();
-            if (reservation == null)
+            try
             {
-                throw new NotFoundException($"找不到預留: {id}");
+                _logger?.LogInformation($"嘗試確認預留: Id={id}, ReferenceId={referenceId}");
+                
+                var filter = Builders<Reservation>.Filter.Eq(r => r.Id, id);
+                var reservation = await _dbContext.Reservations.Find(filter).FirstOrDefaultAsync();
+                
+                if (reservation == null)
+                {
+                    _logger?.LogWarning($"找不到預留: {id}");
+                    return false;
+                }
+                
+                if (reservation.Status != "active")
+                {
+                    _logger?.LogWarning($"預留狀態不是活躍狀態: Id={id}, Status={reservation.Status}");
+                    return false;
+                }
+                
+                // 更新預留狀態
+                var update = Builders<Reservation>.Update
+                    .Set(r => r.Status, "used")
+                    .Set(r => r.ReferenceId, referenceId);
+                
+                var result = await _dbContext.Reservations.UpdateOneAsync(filter, update);
+                
+                if (result.ModifiedCount == 0)
+                {
+                    _logger?.LogWarning($"確認預留失敗: {id}");
+                    return false;
+                }
+                
+                // 更新各產品庫存
+                foreach (var item in reservation.Items)
+                {
+                    if (item.VariantId != null)
+                    {
+                        // 變體庫存已在預留時扣除，無需再次更新
+                    }
+                    else
+                    {
+                        // 更新主產品庫存 - 將預留數量從預留中減去
+                        var productFilter = Builders<Product>.Filter.Eq(p => p.Id, item.ProductId);
+                        var productUpdate = Builders<Product>.Update
+                            .Inc(p => p.Stock.Reserved, -item.Quantity)
+                            .Inc(p => p.Stock.Quantity, -item.Quantity);
+                        
+                        await _dbContext.Products.UpdateOneAsync(productFilter, productUpdate);
+                    }
+                    
+                    // 記錄庫存變動
+                    await CreateInventoryChangeAsync(
+                        item.ProductId,
+                        item.VariantId,
+                        "decrement",
+                        item.Quantity,
+                        "確認預留",
+                        referenceId,
+                        reservation.UserId
+                    );
+                }
+                
+                _logger?.LogInformation($"確認預留成功: Id={id}");
+                return true;
             }
-
-            // 檢查預留狀態
-            if (reservation.Status != "Active")
+            catch (Exception ex)
             {
-                throw new BadRequestException($"預留狀態無效: {reservation.Status}");
+                _logger?.LogError(ex, $"確認預留時發生錯誤: Id={id}");
+                return false;
             }
-
-            // 檢查預留是否過期
-            if (reservation.ExpiresAt < DateTime.UtcNow)
-            {
-                throw new BadRequestException("預留已過期");
-            }
-
-            // 更新預留狀態
-            reservation.Status = "Confirmed";
-            reservation.ReferenceId = referenceId;
-            reservation.UpdatedAt = DateTime.UtcNow;
-
-            // 保存預留
-            await _dbContext.Reservations.ReplaceOneAsync(r => r.Id == id, reservation);
-
-            _logger.LogInformation("商品預留已確認: Id={Id}, ReferenceId={ReferenceId}", id, referenceId);
-
-            return true;
         }
-
+        
         /// <summary>
         /// 取消預留
         /// </summary>
@@ -150,122 +239,139 @@ namespace ProductService.Services
         /// <returns>是否成功</returns>
         public async Task<bool> CancelReservationAsync(string id)
         {
-            _logger.LogInformation("取消商品預留: Id={Id}", id);
-
-            // 獲取預留
-            var reservation = await _dbContext.Reservations.Find(r => r.Id == id).FirstOrDefaultAsync();
-            if (reservation == null)
+            try
             {
-                throw new NotFoundException($"找不到預留: {id}");
+                _logger?.LogInformation($"嘗試取消預留: Id={id}");
+                
+                var filter = Builders<Reservation>.Filter.Eq(r => r.Id, id);
+                var reservation = await _dbContext.Reservations.Find(filter).FirstOrDefaultAsync();
+                
+                if (reservation == null)
+                {
+                    _logger?.LogWarning($"找不到預留: {id}");
+                    return false;
+                }
+                
+                if (reservation.Status != "active")
+                {
+                    _logger?.LogWarning($"預留狀態不是活躍狀態: Id={id}, Status={reservation.Status}");
+                    return false;
+                }
+                
+                // 更新預留狀態
+                var update = Builders<Reservation>.Update
+                    .Set(r => r.Status, "cancelled");
+                
+                var result = await _dbContext.Reservations.UpdateOneAsync(filter, update);
+                
+                if (result.ModifiedCount == 0)
+                {
+                    _logger?.LogWarning($"取消預留失敗: {id}");
+                    return false;
+                }
+                
+                // 更新各產品庫存
+                foreach (var item in reservation.Items)
+                {
+                    if (item.VariantId != null)
+                    {
+                        // 更新變體庫存 - 將預留數量釋放回可用庫存
+                        var filter = Builders<Product>.Filter.And(
+                            Builders<Product>.Filter.Eq(p => p.Id, item.ProductId),
+                            Builders<Product>.Filter.ElemMatch(p => p.Variants, v => v.VariantId == item.VariantId)
+                        );
+                        
+                        var update = Builders<Product>.Update
+                            .Inc("Variants.$.Stock", item.Quantity);
+                        
+                        await _dbContext.Products.UpdateOneAsync(filter, update);
+                    }
+                    else
+                    {
+                        // 更新主產品庫存 - 將預留數量釋放回可用庫存
+                        var productFilter = Builders<Product>.Filter.Eq(p => p.Id, item.ProductId);
+                        var productUpdate = Builders<Product>.Update
+                            .Inc(p => p.Stock.Reserved, -item.Quantity)
+                            .Inc(p => p.Stock.Available, item.Quantity);
+                        
+                        await _dbContext.Products.UpdateOneAsync(productFilter, productUpdate);
+                    }
+                    
+                    // 記錄庫存變動
+                    await CreateInventoryChangeAsync(
+                        item.ProductId,
+                        item.VariantId,
+                        "release",
+                        item.Quantity,
+                        "取消預留",
+                        reservation.Id,
+                        reservation.UserId
+                    );
+                }
+                
+                _logger?.LogInformation($"取消預留成功: Id={id}");
+                return true;
             }
-
-            // 檢查預留狀態
-            if (reservation.Status != "Active")
+            catch (Exception ex)
             {
-                throw new BadRequestException($"預留狀態無效: {reservation.Status}");
+                _logger?.LogError(ex, $"取消預留時發生錯誤: Id={id}");
+                return false;
             }
-
-            // 更新預留狀態
-            reservation.Status = "Cancelled";
-            reservation.UpdatedAt = DateTime.UtcNow;
-
-            // 保存預留
-            await _dbContext.Reservations.ReplaceOneAsync(r => r.Id == id, reservation);
-
-            // 恢復庫存
-            foreach (var item in reservation.Items)
-            {
-                // 創建庫存變動記錄（增加庫存）
-                await CreateInventoryChangeAsync(
-                    productId: item.ProductId,
-                    variantId: item.VariantId,
-                    type: "ReservationCancelled",
-                    quantity: item.Quantity, // 正數表示增加庫存
-                    reason: $"預留取消: {id}",
-                    referenceId: id,
-                    userId: null);
-            }
-
-            _logger.LogInformation("商品預留已取消: Id={Id}", id);
-
-            return true;
         }
-
+        
         /// <summary>
         /// 清理過期預留
         /// </summary>
         /// <returns>清理的預留數量</returns>
         public async Task<int> CleanupExpiredReservationsAsync()
         {
-            _logger.LogInformation("開始清理過期預留");
-
-            // 獲取過期的預留
-            var expiredReservations = await _dbContext.Reservations
-                .Find(r => r.Status == "Active" && r.ExpiresAt < DateTime.UtcNow)
-                .ToListAsync();
-
-            if (!expiredReservations.Any())
+            try
             {
-                _logger.LogInformation("沒有過期的預留需要清理");
-                return 0;
-            }
-
-            _logger.LogInformation("找到 {Count} 個過期預留", expiredReservations.Count);
-
-            // 取消每個過期預留
-            foreach (var reservation in expiredReservations)
-            {
-                // 更新預留狀態
-                reservation.Status = "Expired";
-                reservation.UpdatedAt = DateTime.UtcNow;
-
-                // 保存預留
-                await _dbContext.Reservations.ReplaceOneAsync(r => r.Id == reservation.Id, reservation);
-
-                // 恢復庫存
-                foreach (var item in reservation.Items)
+                _logger?.LogInformation("嘗試清理過期預留");
+                
+                var now = DateTime.UtcNow;
+                var filter = Builders<Reservation>.Filter.And(
+                    Builders<Reservation>.Filter.Eq(r => r.Status, "active"),
+                    Builders<Reservation>.Filter.Lt(r => r.ExpiresAt, now)
+                );
+                
+                var expiredReservations = await _dbContext.Reservations.Find(filter).ToListAsync();
+                
+                if (expiredReservations.Count == 0)
                 {
-                    // 創建庫存變動記錄（增加庫存）
-                    await CreateInventoryChangeAsync(
-                        productId: item.ProductId,
-                        variantId: item.VariantId,
-                        type: "ReservationExpired",
-                        quantity: item.Quantity, // 正數表示增加庫存
-                        reason: $"預留過期: {reservation.Id}",
-                        referenceId: reservation.Id,
-                        userId: null);
+                    _logger?.LogInformation("沒有過期的預留需要清理");
+                    return 0;
                 }
-
-                _logger.LogInformation("過期預留已處理: Id={Id}", reservation.Id);
-            }
-
-            _logger.LogInformation("過期預留清理完成: 共處理 {Count} 個預留", expiredReservations.Count);
-
-            return expiredReservations.Count;
-        }
-
-        /// <summary>
-        /// 獲取會話的預留
-        /// </summary>
-        /// <param name="sessionId">會話ID</param>
-        /// <returns>預留列表</returns>
-        public async Task<List<Reservation>> GetReservationsBySessionAsync(string sessionId)
-        {
-            return await _dbContext.Reservations
-                .Find(r => r.OwnerId == sessionId && r.OwnerType == "Session")
-                .ToListAsync();
-        }
-
-        /// <summary>
-        /// 獲取用戶的預留
-        /// </summary>
-        /// <param name="userId">用戶ID</param>
-        /// <returns>預留列表</returns>
-        public async Task<List<Reservation>> GetReservationsByUserAsync(string userId)
-        {
-            return await _dbContext.Reservations
-                .Find(r => r.OwnerId == userId && r.OwnerType == "User")
-                .ToListAsync();
-        }
-    }
-}
+                
+                int cleanedCount = 0;
+                
+                foreach (var reservation in expiredReservations)
+                {
+                    // 更新預留狀態
+                    var updateFilter = Builders<Reservation>.Filter.Eq(r => r.Id, reservation.Id);
+                    var update = Builders<Reservation>.Update
+                        .Set(r => r.Status, "expired");
+                    
+                    var result = await _dbContext.Reservations.UpdateOneAsync(updateFilter, update);
+                    
+                    if (result.ModifiedCount > 0)
+                    {
+                        // 更新各產品庫存
+                        foreach (var item in reservation.Items)
+                        {
+                            if (item.VariantId != null)
+                            {
+                                // 更新變體庫存 - 將預留數量釋放回可用庫存
+                                var filter = Builders<Product>.Filter.And(
+                                    Builders<Product>.Filter.Eq(p => p.Id, item.ProductId),
+                                    Builders<Product>.Filter.ElemMatch(p => p.Variants, v => v.VariantId == item.VariantId)
+                                );
+                                
+                                var update = Builders<Product>.Update
+                                    .Inc("Variants.$.Stock", item.Quantity);
+                                
+                                await _dbContext.Products.UpdateOneAsync(filter, update);
+                            }
+                            else
+                            {
+                                // 更新主產品庫

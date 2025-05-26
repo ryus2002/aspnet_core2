@@ -1,0 +1,1283 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>auth-service</name>
+    </assembly>
+    <members>
+        <member name="T:AuthService.Attributes.RequirePermissionAttribute">
+            <summary>
+            要求特定權限的屬性
+            </summary>
+        </member>
+        <member name="P:AuthService.Attributes.RequirePermissionAttribute.PermissionName">
+            <summary>
+            權限名稱
+            </summary>
+        </member>
+        <member name="P:AuthService.Attributes.RequirePermissionAttribute.Resource">
+            <summary>
+            資源名稱
+            </summary>
+        </member>
+        <member name="P:AuthService.Attributes.RequirePermissionAttribute.Action">
+            <summary>
+            操作名稱
+            </summary>
+        </member>
+        <member name="M:AuthService.Attributes.RequirePermissionAttribute.#ctor(System.String,System.String)">
+            <summary>
+            建構函數
+            </summary>
+            <param name="resource">資源名稱</param>
+            <param name="action">操作名稱</param>
+        </member>
+        <member name="M:AuthService.Attributes.RequirePermissionAttribute.#ctor(System.String)">
+            <summary>
+            建構函數
+            </summary>
+            <param name="permissionName">權限名稱（格式：resource:action）</param>
+        </member>
+        <member name="T:AuthService.Attributes.RequirePermissionFilter">
+            <summary>
+            權限過濾器
+            </summary>
+        </member>
+        <member name="M:AuthService.Attributes.RequirePermissionFilter.#ctor(System.String,System.String,System.String,System.Boolean)">
+            <summary>
+            建構函數
+            </summary>
+            <param name="resource">資源</param>
+            <param name="action">操作</param>
+            <param name="permissionName">權限名稱</param>
+            <param name="usePermissionName">是否使用權限名稱</param>
+        </member>
+        <member name="M:AuthService.Attributes.RequirePermissionFilter.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)">
+            <summary>
+            授權處理
+            </summary>
+            <param name="context">上下文</param>
+            <returns>任務</returns>
+        </member>
+        <member name="T:AuthService.Controllers.PermissionController">
+            <summary>
+            權限控制器，處理權限相關操作
+            </summary>
+        </member>
+        <member name="M:AuthService.Controllers.PermissionController.#ctor(AuthService.Services.IPermissionService,Microsoft.Extensions.Logging.ILogger{AuthService.Controllers.PermissionController})">
+            <summary>
+            構造函數，注入所需服務
+            </summary>
+            <param name="permissionService">權限服務</param>
+            <param name="logger">日誌記錄器</param>
+        </member>
+        <member name="M:AuthService.Controllers.PermissionController.GetAllPermissions">
+            <summary>
+            獲取所有權限
+            </summary>
+            <returns>權限列表</returns>
+        </member>
+        <member name="M:AuthService.Controllers.PermissionController.GetPermissionById(System.String)">
+            <summary>
+            根據ID獲取權限
+            </summary>
+            <param name="id">權限ID</param>
+            <returns>權限信息</returns>
+        </member>
+        <member name="M:AuthService.Controllers.PermissionController.CreatePermission(AuthService.Models.Permission)">
+            <summary>
+            創建新權限
+            </summary>
+            <param name="permission">權限對象</param>
+            <returns>創建的權限</returns>
+        </member>
+        <member name="M:AuthService.Controllers.PermissionController.UpdatePermission(System.String,AuthService.Models.Permission)">
+            <summary>
+            更新權限
+            </summary>
+            <param name="id">權限ID</param>
+            <param name="permission">權限對象</param>
+            <returns>更新後的權限</returns>
+        </member>
+        <member name="M:AuthService.Controllers.PermissionController.DeletePermission(System.String)">
+            <summary>
+            刪除權限
+            </summary>
+            <param name="id">權限ID</param>
+            <returns>操作結果</returns>
+        </member>
+        <member name="M:AuthService.Controllers.PermissionController.AssignPermissionToRole(System.String,System.String)">
+            <summary>
+            為角色分配權限
+            </summary>
+            <param name="roleId">角色ID</param>
+            <param name="permissionId">權限ID</param>
+            <returns>操作結果</returns>
+        </member>
+        <member name="M:AuthService.Controllers.PermissionController.RemovePermissionFromRole(System.String,System.String)">
+            <summary>
+            從角色移除權限
+            </summary>
+            <param name="roleId">角色ID</param>
+            <param name="permissionId">權限ID</param>
+            <returns>操作結果</returns>
+        </member>
+        <member name="M:AuthService.Controllers.PermissionController.GetUserPermissions(System.String)">
+            <summary>
+            獲取用戶的所有權限
+            </summary>
+            <param name="userId">用戶ID</param>
+            <returns>權限列表</returns>
+        </member>
+        <member name="T:AuthService.Controllers.RoleController">
+            <summary>
+            角色控制器，處理角色相關操作
+            </summary>
+        </member>
+        <member name="M:AuthService.Controllers.RoleController.#ctor(AuthService.Services.IRoleService,Microsoft.Extensions.Logging.ILogger{AuthService.Controllers.RoleController})">
+            <summary>
+            構造函數，注入所需服務
+            </summary>
+            <param name="roleService">角色服務</param>
+            <param name="logger">日誌記錄器</param>
+        </member>
+        <member name="M:AuthService.Controllers.RoleController.GetAllRoles">
+            <summary>
+            獲取所有角色
+            </summary>
+            <returns>角色列表</returns>
+        </member>
+        <member name="M:AuthService.Controllers.RoleController.GetRoleById(System.String)">
+            <summary>
+            根據ID獲取角色
+            </summary>
+            <param name="id">角色ID</param>
+            <returns>角色信息</returns>
+        </member>
+        <member name="M:AuthService.Controllers.RoleController.CreateRole(AuthService.Models.Role)">
+            <summary>
+            創建新角色
+            </summary>
+            <param name="role">角色對象</param>
+            <returns>創建的角色</returns>
+        </member>
+        <member name="M:AuthService.Controllers.RoleController.UpdateRole(System.String,AuthService.Models.Role)">
+            <summary>
+            更新角色
+            </summary>
+            <param name="id">角色ID</param>
+            <param name="role">角色對象</param>
+            <returns>更新後的角色</returns>
+        </member>
+        <member name="M:AuthService.Controllers.RoleController.DeleteRole(System.String)">
+            <summary>
+            刪除角色
+            </summary>
+            <param name="id">角色ID</param>
+            <returns>操作結果</returns>
+        </member>
+        <member name="M:AuthService.Controllers.RoleController.AssignRoleToUser(System.String,System.String)">
+            <summary>
+            為用戶分配角色
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="roleId">角色ID</param>
+            <returns>操作結果</returns>
+        </member>
+        <member name="M:AuthService.Controllers.RoleController.RemoveRoleFromUser(System.String,System.String)">
+            <summary>
+            從用戶移除角色
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="roleId">角色ID</param>
+            <returns>操作結果</returns>
+        </member>
+        <member name="M:AuthService.Controllers.RoleController.GetRolePermissions(System.String)">
+            <summary>
+            獲取角色的所有權限
+            </summary>
+            <param name="roleId">角色ID</param>
+            <returns>權限列表</returns>
+        </member>
+        <member name="M:AuthService.Controllers.RoleController.GetUserRoles(System.String)">
+            <summary>
+            獲取用戶的所有角色
+            </summary>
+            <param name="userId">用戶ID</param>
+            <returns>角色列表</returns>
+        </member>
+        <member name="T:AuthService.Controllers.UserController">
+            <summary>
+            用戶控制器，處理用戶相關操作
+            </summary>
+        </member>
+        <member name="M:AuthService.Controllers.UserController.#ctor(AuthService.Services.IUserService,AuthService.Services.IPermissionService,Microsoft.Extensions.Logging.ILogger{AuthService.Controllers.UserController})">
+            <summary>
+            構造函數，注入所需服務
+            </summary>
+            <param name="userService">用戶服務</param>
+            <param name="permissionService">權限服務</param>
+            <param name="logger">日誌記錄器</param>
+        </member>
+        <member name="M:AuthService.Controllers.UserController.GetAllUsers">
+            <summary>
+            獲取所有用戶
+            </summary>
+            <returns>用戶列表</returns>
+        </member>
+        <member name="M:AuthService.Controllers.UserController.GetUserById(System.String)">
+            <summary>
+            根據ID獲取用戶
+            </summary>
+            <param name="id">用戶ID</param>
+            <returns>用戶信息</returns>
+        </member>
+        <member name="M:AuthService.Controllers.UserController.UpdateUser(System.String,AuthService.Controllers.UpdateUserRequest)">
+            <summary>
+            更新用戶信息
+            </summary>
+            <param name="id">用戶ID</param>
+            <param name="updateRequest">更新請求</param>
+            <returns>更新後的用戶信息</returns>
+        </member>
+        <member name="M:AuthService.Controllers.UserController.DeleteUser(System.String)">
+            <summary>
+            刪除用戶
+            </summary>
+            <param name="id">用戶ID</param>
+            <returns>操作結果</returns>
+        </member>
+        <member name="T:AuthService.Controllers.UserDto">
+            <summary>
+            用戶數據傳輸對象
+            </summary>
+        </member>
+        <member name="P:AuthService.Controllers.UserDto.Id">
+            <summary>
+            用戶ID
+            </summary>
+        </member>
+        <member name="P:AuthService.Controllers.UserDto.Username">
+            <summary>
+            用戶名
+            </summary>
+        </member>
+        <member name="P:AuthService.Controllers.UserDto.Email">
+            <summary>
+            電子郵件
+            </summary>
+        </member>
+        <member name="P:AuthService.Controllers.UserDto.FullName">
+            <summary>
+            全名
+            </summary>
+        </member>
+        <member name="P:AuthService.Controllers.UserDto.IsActive">
+            <summary>
+            是否啟用
+            </summary>
+        </member>
+        <member name="P:AuthService.Controllers.UserDto.EmailVerified">
+            <summary>
+            電子郵件是否已驗證
+            </summary>
+        </member>
+        <member name="P:AuthService.Controllers.UserDto.CreatedAt">
+            <summary>
+            創建時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Controllers.UserDto.UpdatedAt">
+            <summary>
+            更新時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Controllers.UserDto.LastLogin">
+            <summary>
+            最後登入時間
+            </summary>
+        </member>
+        <member name="T:AuthService.Controllers.UpdateUserRequest">
+            <summary>
+            更新用戶請求
+            </summary>
+        </member>
+        <member name="P:AuthService.Controllers.UpdateUserRequest.FullName">
+            <summary>
+            全名
+            </summary>
+        </member>
+        <member name="P:AuthService.Controllers.UpdateUserRequest.IsActive">
+            <summary>
+            是否啟用
+            </summary>
+        </member>
+        <member name="T:AuthService.Data.AuthDbContext">
+            <summary>
+            認證服務資料庫上下文類，用於與資料庫交互
+            </summary>
+        </member>
+        <member name="M:AuthService.Data.AuthDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{AuthService.Data.AuthDbContext})">
+            <summary>
+            構造函數
+            </summary>
+            <param name="options">資料庫上下文選項</param>
+        </member>
+        <member name="P:AuthService.Data.AuthDbContext.Users">
+            <summary>
+            用戶資料集
+            </summary>
+        </member>
+        <member name="P:AuthService.Data.AuthDbContext.Roles">
+            <summary>
+            角色資料集
+            </summary>
+        </member>
+        <member name="P:AuthService.Data.AuthDbContext.Permissions">
+            <summary>
+            權限資料集
+            </summary>
+        </member>
+        <member name="P:AuthService.Data.AuthDbContext.UserRoles">
+            <summary>
+            用戶角色關聯資料集
+            </summary>
+        </member>
+        <member name="P:AuthService.Data.AuthDbContext.RolePermissions">
+            <summary>
+            角色權限關聯資料集
+            </summary>
+        </member>
+        <member name="P:AuthService.Data.AuthDbContext.RefreshTokens">
+            <summary>
+            刷新令牌資料集
+            </summary>
+        </member>
+        <member name="M:AuthService.Data.AuthDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            模型創建配置
+            </summary>
+            <param name="modelBuilder">模型構建器</param>
+        </member>
+        <member name="T:AuthService.DTOs.RegisterRequest">
+            <summary>
+            用戶註冊請求DTO
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.RegisterRequest.Username">
+            <summary>
+            用戶名，用於登入
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.RegisterRequest.Email">
+            <summary>
+            用戶電子郵件
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.RegisterRequest.Password">
+            <summary>
+            用戶密碼
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.RegisterRequest.ConfirmPassword">
+            <summary>
+            確認密碼
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.RegisterRequest.FullName">
+            <summary>
+            用戶全名
+            </summary>
+        </member>
+        <member name="T:AuthService.DTOs.LoginRequest">
+            <summary>
+            用戶登入請求DTO
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.LoginRequest.Username">
+            <summary>
+            用戶名或電子郵件
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.LoginRequest.Password">
+            <summary>
+            用戶密碼
+            </summary>
+        </member>
+        <member name="T:AuthService.DTOs.RefreshTokenRequest">
+            <summary>
+            刷新令牌請求DTO
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.RefreshTokenRequest.RefreshToken">
+            <summary>
+            刷新令牌
+            </summary>
+        </member>
+        <member name="T:AuthService.DTOs.ResetPasswordRequest">
+            <summary>
+            重置密碼請求DTO
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.ResetPasswordRequest.Email">
+            <summary>
+            用戶電子郵件
+            </summary>
+        </member>
+        <member name="T:AuthService.DTOs.SetNewPasswordRequest">
+            <summary>
+            設置新密碼請求DTO
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.SetNewPasswordRequest.ResetToken">
+            <summary>
+            重置令牌
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.SetNewPasswordRequest.NewPassword">
+            <summary>
+            新密碼
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.SetNewPasswordRequest.ConfirmNewPassword">
+            <summary>
+            確認新密碼
+            </summary>
+        </member>
+        <member name="T:AuthService.DTOs.AuthResponse">
+            <summary>
+            認證響應DTO
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.AuthResponse.Id">
+            <summary>
+            用戶ID
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.AuthResponse.Username">
+            <summary>
+            用戶名
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.AuthResponse.Email">
+            <summary>
+            用戶電子郵件
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.AuthResponse.FullName">
+            <summary>
+            用戶全名
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.AuthResponse.Roles">
+            <summary>
+            用戶角色列表
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.AuthResponse.AccessToken">
+            <summary>
+            JWT訪問令牌
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.AuthResponse.AccessTokenExpires">
+            <summary>
+            訪問令牌過期時間
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.AuthResponse.RefreshToken">
+            <summary>
+            刷新令牌
+            </summary>
+        </member>
+        <member name="P:AuthService.DTOs.AuthResponse.EmailVerified">
+            <summary>
+            用戶是否已驗證電子郵件
+            </summary>
+        </member>
+        <member name="T:AuthService.Middleware.AuthorizationMiddleware">
+            <summary>
+            授權中間件，用於驗證請求中的JWT令牌並檢查用戶權限
+            </summary>
+        </member>
+        <member name="M:AuthService.Middleware.AuthorizationMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate,Microsoft.Extensions.Logging.ILogger{AuthService.Middleware.AuthorizationMiddleware},Microsoft.Extensions.Options.IOptions{AuthService.Settings.JwtSettings})">
+            <summary>
+            構造函數，注入依賴項
+            </summary>
+            <param name="next">請求處理管道中的下一個中間件</param>
+            <param name="logger">日誌記錄器</param>
+            <param name="jwtSettings">JWT設置</param>
+        </member>
+        <member name="M:AuthService.Middleware.AuthorizationMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext,AuthService.Services.IPermissionService)">
+            <summary>
+            處理HTTP請求
+            </summary>
+            <param name="context">HTTP上下文</param>
+            <param name="permissionService">權限服務</param>
+            <returns>異步任務</returns>
+        </member>
+        <member name="M:AuthService.Middleware.AuthorizationMiddleware.ValidateToken(System.String)">
+            <summary>
+            驗證JWT令牌
+            </summary>
+            <param name="token">JWT令牌</param>
+            <returns>聲明主體，如果令牌無效則返回null</returns>
+        </member>
+        <member name="M:AuthService.Middleware.AuthorizationMiddleware.ShouldSkipAuthorization(Microsoft.AspNetCore.Http.PathString)">
+            <summary>
+            檢查是否應該跳過授權
+            </summary>
+            <param name="path">請求路徑</param>
+            <returns>是否應該跳過授權</returns>
+        </member>
+        <member name="T:AuthService.Models.Permission">
+            <summary>
+            權限模型類，定義系統中的操作權限
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Permission.Id">
+            <summary>
+            權限唯一標識符
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Permission.Name">
+            <summary>
+            權限名稱，如 "CreateUser", "ReadProduct" 等
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Permission.Description">
+            <summary>
+            權限描述
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Permission.Resource">
+            <summary>
+            資源名稱，如 "User", "Product" 等
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Permission.Action">
+            <summary>
+            操作類型，如 "Create", "Read", "Update", "Delete" 等
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Permission.CreatedAt">
+            <summary>
+            權限創建時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Permission.UpdatedAt">
+            <summary>
+            權限更新時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Permission.RolePermissions">
+            <summary>
+            權限與角色的關聯集合
+            </summary>
+        </member>
+        <member name="T:AuthService.Models.RefreshToken">
+            <summary>
+            刷新令牌模型，用於JWT認證系統中刷新訪問令牌
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RefreshToken.Id">
+            <summary>
+            刷新令牌唯一標識符
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RefreshToken.UserId">
+            <summary>
+            所屬用戶ID
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RefreshToken.Token">
+            <summary>
+            刷新令牌值
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RefreshToken.ExpiresAt">
+            <summary>
+            令牌過期時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RefreshToken.CreatedAt">
+            <summary>
+            令牌創建時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RefreshToken.CreatedByIp">
+            <summary>
+            令牌創建IP地址
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RefreshToken.IsRevoked">
+            <summary>
+            令牌是否已被撤銷
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RefreshToken.RevokedAt">
+            <summary>
+            令牌撤銷時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RefreshToken.RevokedByIp">
+            <summary>
+            令牌撤銷IP地址
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RefreshToken.ReplacedByToken">
+            <summary>
+            替換此令牌的新令牌
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RefreshToken.IsActive">
+            <summary>
+            令牌是否處於活躍狀態
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RefreshToken.User">
+            <summary>
+            用戶導航屬性
+            </summary>
+        </member>
+        <member name="T:AuthService.Models.Role">
+            <summary>
+            角色模型類，定義系統中的用戶角色
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Role.Id">
+            <summary>
+            角色唯一標識符
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Role.Name">
+            <summary>
+            角色名稱，如 "Admin", "User" 等
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Role.Description">
+            <summary>
+            角色描述
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Role.IsSystem">
+            <summary>
+            是否為系統預設角色
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Role.CreatedAt">
+            <summary>
+            角色創建時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Role.UpdatedAt">
+            <summary>
+            角色更新時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Role.UserRoles">
+            <summary>
+            角色與用戶的關聯集合
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.Role.RolePermissions">
+            <summary>
+            角色與權限的關聯集合
+            </summary>
+        </member>
+        <member name="T:AuthService.Models.RolePermission">
+            <summary>
+            角色與權限的多對多關聯模型
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RolePermission.RoleId">
+            <summary>
+            角色ID
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RolePermission.PermissionId">
+            <summary>
+            權限ID
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RolePermission.CreatedAt">
+            <summary>
+            關聯創建時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RolePermission.Role">
+            <summary>
+            角色導航屬性
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.RolePermission.Permission">
+            <summary>
+            權限導航屬性
+            </summary>
+        </member>
+        <member name="T:AuthService.Models.User">
+            <summary>
+            用戶模型類，存儲用戶的基本信息
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.Id">
+            <summary>
+            用戶唯一標識符
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.Username">
+            <summary>
+            用戶名，用於登入
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.Email">
+            <summary>
+            用戶電子郵件地址，用於通知和密碼重置
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.PasswordHash">
+            <summary>
+            用戶密碼的雜湊值，不存儲明文密碼
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.Salt">
+            <summary>
+            密碼加密的鹽值
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.FullName">
+            <summary>
+            用戶的全名
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.IsActive">
+            <summary>
+            用戶是否已激活賬戶
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.EmailVerified">
+            <summary>
+            用戶電子郵件是否已驗證
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.CreatedAt">
+            <summary>
+            用戶創建時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.UpdatedAt">
+            <summary>
+            用戶最後更新時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.LastLogin">
+            <summary>
+            用戶最後登入時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.LastLoginIp">
+            <summary>
+            用戶最後登入IP
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.RefreshTokens">
+            <summary>
+            用戶刷新令牌集合
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.UserRoles">
+            <summary>
+            用戶角色關聯集合
+            </summary>
+        </member>
+        <member name="T:AuthService.Models.UserRole">
+            <summary>
+            用戶與角色的多對多關聯模型
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.UserRole.UserId">
+            <summary>
+            用戶ID
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.UserRole.RoleId">
+            <summary>
+            角色ID
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.UserRole.CreatedAt">
+            <summary>
+            關聯創建時間
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.UserRole.User">
+            <summary>
+            用戶導航屬性
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.UserRole.Role">
+            <summary>
+            角色導航屬性
+            </summary>
+        </member>
+        <member name="T:AuthService.Services.IJwtService">
+            <summary>
+            JWT服務介面
+            </summary>
+        </member>
+        <member name="M:AuthService.Services.IJwtService.GenerateJwtToken(AuthService.Models.User,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            生成JWT令牌
+            </summary>
+            <param name="user">用戶</param>
+            <param name="roles">用戶角色</param>
+            <returns>令牌和過期時間</returns>
+        </member>
+        <member name="M:AuthService.Services.IJwtService.GenerateRefreshToken(System.String,System.String)">
+            <summary>
+            生成刷新令牌
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="ipAddress">IP地址</param>
+            <returns>刷新令牌</returns>
+        </member>
+        <member name="M:AuthService.Services.IJwtService.GetPrincipalFromToken(System.String)">
+            <summary>
+            從令牌獲取主體
+            </summary>
+            <param name="token">JWT令牌</param>
+            <returns>主體</returns>
+        </member>
+        <member name="T:AuthService.Services.IPermissionService">
+            <summary>
+            權限服務介面
+            </summary>
+        </member>
+        <member name="M:AuthService.Services.IPermissionService.UserHasPermission(System.String,System.String,System.String)">
+            <summary>
+            檢查用戶是否擁有指定的權限
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="resource">資源名稱</param>
+            <param name="action">操作名稱</param>
+            <returns>是否有權限</returns>
+        </member>
+        <member name="M:AuthService.Services.IPermissionService.UserHasPermissionByName(System.String,System.String)">
+            <summary>
+            根據權限名稱檢查用戶是否擁有指定的權限
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="permissionName">權限名稱</param>
+            <returns>是否有權限</returns>
+        </member>
+        <member name="M:AuthService.Services.IPermissionService.GetUserPermissions(System.String)">
+            <summary>
+            獲取用戶的所有權限
+            </summary>
+            <param name="userId">用戶ID</param>
+            <returns>權限列表</returns>
+        </member>
+        <member name="M:AuthService.Services.IPermissionService.AssignPermissionToRole(System.String,System.String)">
+            <summary>
+            為角色分配權限
+            </summary>
+            <param name="roleId">角色ID</param>
+            <param name="permissionId">權限ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:AuthService.Services.IPermissionService.RemovePermissionFromRole(System.String,System.String)">
+            <summary>
+            從角色中移除權限
+            </summary>
+            <param name="roleId">角色ID</param>
+            <param name="permissionId">權限ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:AuthService.Services.IPermissionService.CreatePermission(AuthService.Models.Permission)">
+            <summary>
+            創建新權限
+            </summary>
+            <param name="permission">權限實體</param>
+            <returns>創建的權限</returns>
+        </member>
+        <member name="M:AuthService.Services.IPermissionService.GetAllPermissions">
+            <summary>
+            獲取所有權限
+            </summary>
+            <returns>權限列表</returns>
+        </member>
+        <member name="M:AuthService.Services.IPermissionService.GetPermissionById(System.String)">
+            <summary>
+            根據ID獲取權限
+            </summary>
+            <param name="id">權限ID</param>
+            <returns>權限，如不存在則返回null</returns>
+        </member>
+        <member name="M:AuthService.Services.IPermissionService.UpdatePermission(System.String,AuthService.Models.Permission)">
+            <summary>
+            更新權限
+            </summary>
+            <param name="id">權限ID</param>
+            <param name="permission">更新後的權限資訊</param>
+            <returns>更新後的權限</returns>
+        </member>
+        <member name="M:AuthService.Services.IPermissionService.DeletePermission(System.String)">
+            <summary>
+            刪除權限
+            </summary>
+            <param name="id">權限ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="T:AuthService.Services.IRoleService">
+            <summary>
+            角色服務介面
+            </summary>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.CreateRoleAsync(System.String,System.String)">
+            <summary>
+            創建新角色
+            </summary>
+            <param name="name">角色名稱</param>
+            <param name="description">角色描述</param>
+            <returns>創建的角色</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.GetAllRolesAsync">
+            <summary>
+            獲取所有角色
+            </summary>
+            <returns>角色列表</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.GetRoleByIdAsync(System.String)">
+            <summary>
+            根據ID獲取角色
+            </summary>
+            <param name="id">角色ID</param>
+            <returns>角色，如不存在則返回null</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.GetRoleByNameAsync(System.String)">
+            <summary>
+            根據名稱獲取角色
+            </summary>
+            <param name="name">角色名稱</param>
+            <returns>角色，如不存在則返回null</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.UpdateRoleAsync(System.String,System.String,System.String)">
+            <summary>
+            更新角色
+            </summary>
+            <param name="id">角色ID</param>
+            <param name="name">新角色名稱</param>
+            <param name="description">新角色描述</param>
+            <returns>更新後的角色</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.DeleteRoleAsync(System.String)">
+            <summary>
+            刪除角色
+            </summary>
+            <param name="id">角色ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.AssignRoleToUserAsync(System.String,System.String)">
+            <summary>
+            為用戶分配角色
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="roleId">角色ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.RemoveRoleFromUserAsync(System.String,System.String)">
+            <summary>
+            移除用戶的角色
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="roleId">角色ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.GetAllRoles">
+            <summary>
+            獲取所有角色
+            </summary>
+            <returns>角色列表</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.GetRoleById(System.String)">
+            <summary>
+            根據ID獲取角色
+            </summary>
+            <param name="id">角色ID</param>
+            <returns>角色，如不存在則返回null</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.CreateRole(AuthService.Models.Role)">
+            <summary>
+            創建新角色
+            </summary>
+            <param name="role">角色資訊</param>
+            <returns>創建的角色</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.UpdateRole(System.String,AuthService.Models.Role)">
+            <summary>
+            更新角色
+            </summary>
+            <param name="id">角色ID</param>
+            <param name="role">更新後的角色資訊</param>
+            <returns>更新後的角色</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.DeleteRole(System.String)">
+            <summary>
+            刪除角色
+            </summary>
+            <param name="id">角色ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.AssignRoleToUser(System.String,System.String)">
+            <summary>
+            為用戶分配角色
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="roleId">角色ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.RemoveRoleFromUser(System.String,System.String)">
+            <summary>
+            移除用戶的角色
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="roleId">角色ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.GetRolePermissions(System.String)">
+            <summary>
+            獲取角色的權限
+            </summary>
+            <param name="roleId">角色ID</param>
+            <returns>權限列表</returns>
+        </member>
+        <member name="M:AuthService.Services.IRoleService.GetUserRoles(System.String)">
+            <summary>
+            獲取用戶的角色
+            </summary>
+            <param name="userId">用戶ID</param>
+            <returns>角色列表</returns>
+        </member>
+        <member name="T:AuthService.Services.IUserService">
+            <summary>
+            用戶服務介面
+            </summary>
+        </member>
+        <member name="M:AuthService.Services.IUserService.GetById(System.String)">
+            <summary>
+            根據ID獲取用戶
+            </summary>
+            <param name="id">用戶ID</param>
+            <returns>用戶，如不存在則返回null</returns>
+        </member>
+        <member name="M:AuthService.Services.IUserService.GetByUsername(System.String)">
+            <summary>
+            根據用戶名獲取用戶
+            </summary>
+            <param name="username">用戶名</param>
+            <returns>用戶，如不存在則返回null</returns>
+        </member>
+        <member name="M:AuthService.Services.IUserService.GetByEmail(System.String)">
+            <summary>
+            根據電子郵件獲取用戶
+            </summary>
+            <param name="email">電子郵件</param>
+            <returns>用戶，如不存在則返回null</returns>
+        </member>
+        <member name="M:AuthService.Services.IUserService.GetUserByRefreshToken(System.String)">
+            <summary>
+            根據刷新令牌獲取用戶
+            </summary>
+            <param name="refreshToken">刷新令牌</param>
+            <returns>用戶，如不存在則返回null</returns>
+        </member>
+        <member name="M:AuthService.Services.IUserService.Register(AuthService.DTOs.RegisterRequest)">
+            <summary>
+            註冊新用戶
+            </summary>
+            <param name="request">註冊請求</param>
+            <returns>創建的用戶</returns>
+        </member>
+        <member name="M:AuthService.Services.IUserService.ValidatePassword(AuthService.Models.User,System.String)">
+            <summary>
+            驗證用戶密碼
+            </summary>
+            <param name="user">用戶</param>
+            <param name="password">密碼</param>
+            <returns>是否有效</returns>
+        </member>
+        <member name="M:AuthService.Services.IUserService.GetUserRoles(System.String)">
+            <summary>
+            獲取用戶的角色
+            </summary>
+            <param name="userId">用戶ID</param>
+            <returns>角色名稱列表</returns>
+        </member>
+        <member name="M:AuthService.Services.IUserService.UpdateUserAsync(AuthService.Models.User)">
+            <summary>
+            更新用戶
+            </summary>
+            <param name="user">用戶</param>
+            <returns>更新後的用戶</returns>
+        </member>
+        <member name="T:AuthService.Services.JwtService">
+            <summary>
+            JWT服務實現類
+            </summary>
+        </member>
+        <member name="M:AuthService.Services.JwtService.#ctor(Microsoft.Extensions.Options.IOptions{AuthService.Settings.JwtSettings})">
+            <summary>
+            構造函數，注入JWT設置
+            </summary>
+            <param name="jwtSettings">JWT設置</param>
+        </member>
+        <member name="M:AuthService.Services.JwtService.GenerateJwtToken(AuthService.Models.User,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            為用戶生成JWT訪問令牌
+            </summary>
+            <param name="user">用戶對象</param>
+            <param name="roles">用戶角色列表</param>
+            <returns>JWT令牌和過期時間</returns>
+        </member>
+        <member name="M:AuthService.Services.JwtService.GenerateRefreshToken(System.String,System.String)">
+            <summary>
+            生成刷新令牌
+            </summary>
+            <param name="userId">用戶ID</param>
+            <param name="ipAddress">IP地址</param>
+            <returns>刷新令牌對象</returns>
+        </member>
+        <member name="M:AuthService.Services.JwtService.GetPrincipalFromToken(System.String)">
+            <summary>
+            從令牌中獲取聲明主體
+            </summary>
+            <param name="token">JWT令牌</param>
+            <returns>聲明主體</returns>
+        </member>
+        <member name="M:AuthService.Services.JwtService.GenerateRandomToken">
+            <summary>
+            生成隨機令牌
+            </summary>
+            <returns>隨機令牌字符串</returns>
+        </member>
+        <member name="T:AuthService.Services.PermissionService">
+            <summary>
+            權限服務實現
+            </summary>
+        </member>
+        <member name="M:AuthService.Services.PermissionService.#ctor(AuthService.Data.AuthDbContext,Microsoft.Extensions.Logging.ILogger{AuthService.Services.PermissionService})">
+            <summary>
+            建構函數
+            </summary>
+            <param name="context">資料庫上下文</param>
+            <param name="logger">日誌記錄器</param>
+        </member>
+        <member name="M:AuthService.Services.PermissionService.UserHasPermission(System.String,System.String,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.PermissionService.UserHasPermissionByName(System.String,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.PermissionService.GetUserPermissions(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.PermissionService.AssignPermissionToRole(System.String,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.PermissionService.RemovePermissionFromRole(System.String,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.PermissionService.CreatePermission(AuthService.Models.Permission)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.PermissionService.GetAllPermissions">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.PermissionService.GetPermissionById(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.PermissionService.UpdatePermission(System.String,AuthService.Models.Permission)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.PermissionService.DeletePermission(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:AuthService.Services.UserService">
+            <summary>
+            用戶服務實現
+            </summary>
+        </member>
+        <member name="M:AuthService.Services.UserService.#ctor(AuthService.Data.AuthDbContext)">
+            <summary>
+            建構函數
+            </summary>
+            <param name="context">資料庫上下文</param>
+        </member>
+        <member name="M:AuthService.Services.UserService.GetById(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.UserService.GetByUsername(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.UserService.GetByEmail(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.UserService.GetUserByRefreshToken(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.UserService.Register(AuthService.DTOs.RegisterRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.UserService.ValidatePassword(AuthService.Models.User,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.UserService.GetUserRoles(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.UserService.UpdateUserAsync(AuthService.Models.User)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Services.UserService.GenerateSalt">
+            <summary>
+            生成隨機鹽值
+            </summary>
+            <returns>Base64編碼的鹽值</returns>
+        </member>
+        <member name="M:AuthService.Services.UserService.HashPassword(System.String,System.String)">
+            <summary>
+            使用鹽值哈希密碼
+            </summary>
+            <param name="password">密碼</param>
+            <param name="salt">鹽值</param>
+            <returns>Base64編碼的哈希值</returns>
+        </member>
+        <member name="T:AuthService.Settings.JwtSettings">
+            <summary>
+            JWT配置類，用於存儲JWT相關設置
+            </summary>
+        </member>
+        <member name="P:AuthService.Settings.JwtSettings.Secret">
+            <summary>
+            JWT密鑰，用於簽名令牌
+            </summary>
+        </member>
+        <member name="P:AuthService.Settings.JwtSettings.Issuer">
+            <summary>
+            令牌發行者
+            </summary>
+        </member>
+        <member name="P:AuthService.Settings.JwtSettings.Audience">
+            <summary>
+            令牌接收者
+            </summary>
+        </member>
+        <member name="P:AuthService.Settings.JwtSettings.AccessTokenExpirationMinutes">
+            <summary>
+            訪問令牌過期時間（分鐘）
+            </summary>
+        </member>
+        <member name="P:AuthService.Settings.JwtSettings.RefreshTokenExpirationDays">
+            <summary>
+            刷新令牌過期時間（天）
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,7 @@
+e:\code\net\project1\tests\ProductService.IntegrationTests\bin\Debug\net8.0\CoverletSourceRootsMapping_ProductService.IntegrationTests
+e:\code\net\project1\tests\ProductService.IntegrationTests\obj\Debug\net8.0\ProductService.IntegrationTests.csproj.AssemblyReference.cache
+e:\code\net\project1\tests\ProductService.IntegrationTests\obj\Debug\net8.0\ProductService.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig
+e:\code\net\project1\tests\ProductService.IntegrationTests\obj\Debug\net8.0\ProductService.IntegrationTests.AssemblyInfoInputs.cache
+e:\code\net\project1\tests\ProductService.IntegrationTests\obj\Debug\net8.0\ProductService.IntegrationTests.AssemblyInfo.cs
+e:\code\net\project1\tests\ProductService.IntegrationTests\obj\Debug\net8.0\ProductService.IntegrationTests.csproj.CoreCompileInputs.cache
+e:\code\net\project1\tests\ProductService.IntegrationTests\obj\Debug\net8.0\ProductService.IntegrationTests.sourcelink.json

@@ -1,0 +1,6 @@
+<!-- 默認用戶頭像 SVG 文件 -->
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150" fill="none">
+  <circle cx="75" cy="75" r="75" fill="#E9ECEF"/>
+  <path d="M75 75C88.8071 75 100 63.8071 100 50C100 36.1929 88.8071 25 75 25C61.1929 25 50 36.1929 50 50C50 63.8071 61.1929 75 75 75Z" fill="#ADB5BD"/>
+  <path d="M116.667 125C116.667 102.5 97.5 83.3333 75 83.3333C52.5 83.3333 33.3333 102.5 33.3333 125" stroke="#ADB5BD" stroke-width="16.6667" stroke-linecap="round"/>
+</svg>

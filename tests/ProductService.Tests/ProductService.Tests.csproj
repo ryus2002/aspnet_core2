@@ -22,10 +22,11 @@
     </PackageReference>
     <PackageReference Include="Moq" Version="4.20.70" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.23.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\services\product-service\ProductService.csproj" />
+    <ProjectReference Include="..\..\services\product-service\product-service.csproj" />
   </ItemGroup>
 
 </Project>

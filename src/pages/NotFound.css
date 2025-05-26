@@ -1,0 +1,89 @@
+/**
+ * 404頁面樣式
+ */
+.not-found-page {
+  padding: 60px 0;
+  text-align: center;
+}
+
+.not-found-content {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.not-found-code {
+  font-size: 6rem;
+  font-weight: bold;
+  color: #1890ff;
+  line-height: 1;
+  margin-bottom: 20px;
+}
+
+.not-found-title {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.not-found-message {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+}
+
+.not-found-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.home-button {
+  padding: 10px 25px;
+  background-color: #1890ff;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.home-button:hover {
+  background-color: #40a9ff;
+}
+
+.products-button {
+  padding: 10px 25px;
+  background-color: white;
+  color: #1890ff;
+  border: 1px solid #1890ff;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.products-button:hover {
+  background-color: #e6f7ff;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .not-found-code {
+    font-size: 4rem;
+  }
+  
+  .not-found-title {
+    font-size: 1.5rem;
+  }
+  
+  .not-found-message {
+    font-size: 1rem;
+  }
+  
+  .not-found-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
